@@ -1,23 +1,26 @@
 ﻿version: '3'
 services:
-#  OkCoin:
-#    image: okcoinapi
-#    container_name: okcoinapi
-#    build:
-#      context: .
-#      dockerfile: Dockerfile
-#    environment:
-#      - ASPNETCORE_ENVIRONMENT=Production
-#      - ASPNETCORE_URLS=http://+:80
-#    ports: 
-#      - "8080:80"
-#    networks:
-#        - okcoin
-#    extra_hosts:
-#      - "host.docker.internal:host-gateway"
-#    depends_on:
-#        - mongodb
-#        - redis
+  OkCoin:
+    image: okcoinapi
+    container_name: okcoinapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:80
+      MyDatabase__ConnectionString: "mongodb://root:root@mongodb:27017"
+      MyDatabase__DatabaseName: "OkCoinDB"
+      MyDatabase__RedisConnectionString: "redis:6379"
+    ports: 
+      - "8080:80"
+    networks:
+        - okcoin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+        - mongodb
+        - redis
 
   mongodb:
     image: mongo:latest
