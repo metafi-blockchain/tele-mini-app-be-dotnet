@@ -1,0 +1,21 @@
+﻿version: '3'
+services:
+  OkCoin:
+    image: okcoinapi
+    container_name: okcoinapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=http://+:80
+    ports: 
+      - "80:80"
+    networks:
+        - okcoin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  okcoin:
+        driver: bridge

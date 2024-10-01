@@ -1,0 +1,53 @@
+﻿version: '3'
+services:
+#  OkCoin:
+#    image: okcoinapi
+#    container_name: okcoinapi
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    environment:
+#      - ASPNETCORE_ENVIRONMENT=Production
+#      - ASPNETCORE_URLS=http://+:80
+#    ports: 
+#      - "8080:80"
+#    networks:
+#        - okcoin
+#    extra_hosts:
+#      - "host.docker.internal:host-gateway"
+#    depends_on:
+#        - mongodb
+#        - redis
+
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+        - okcoin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  redis:
+    image: redis:latest
+    command: redis-server
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+        - okcoin
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  mongodb_data:
+  redis_data:
+networks:
+  okcoin:
+        driver: bridge

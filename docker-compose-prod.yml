@@ -1,0 +1,49 @@
+﻿version: "3.8"
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - /mnt/volume_sgp1_01/mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  redis:
+    image: redis:latest
+    command: redis-server
+    container_name: redis
+    restart: always
+    volumes:
+      - /mnt/volume_sgp1_01/redis_data:/data
+    ports:
+      - "6379:6379"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  OkCoin:
+    image: okcoinapi
+    container_name: okcoinapi
+    restart: always
+    depends_on:
+      - redis
+      - mongodb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "80:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  okcoin:
+    driver: bridge
