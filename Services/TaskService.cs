@@ -159,7 +159,7 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Social,
-                Title = "Join Sports Hero",
+                Title = "Join External Kingdom",
                 Description = "Join our Telegram channel",
                 Reward = 50000m,
                 IsActive = true,
