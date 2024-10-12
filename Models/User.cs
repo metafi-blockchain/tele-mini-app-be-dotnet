@@ -66,6 +66,10 @@ public class User
     public DateTime? PremiumBotAt { get; set; }
     [BsonElement("ton_balance")]
     public long TonBalance { get; set; } = 0;
+
+    [BsonElement("is_receive_point_reward")]
+    public bool IsReceivePointReward { get; set; }
+
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
         Id = Id ?? string.Empty,

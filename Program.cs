@@ -74,6 +74,8 @@ builder.Services.Configure<TonChainSettings>(
     builder.Configuration.GetSection("TonChainSettings"));
 builder.Services.Configure<CronJobSettings>(
     builder.Configuration.GetSection("CronJobSettings"));
+builder.Services.Configure<List<PointRewardDocuments>>(
+    builder.Configuration.GetSection("PointRewardDocuments"));
 
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITappingService, TappingService>();

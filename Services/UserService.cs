@@ -26,6 +26,7 @@ public interface IUserService
     Task<ResponseDto<MeResponse>> MeAsync(string id);
     Task<ResponseDto<List<RefererViewModel>>> ListReferrals(string id);
     long CountTotalUsers();
+    Task<ResponseDto<int>> GetPointRewardAsync(string userId);
 }
 
 public class UserService : IUserService
@@ -36,14 +37,16 @@ public class UserService : IUserService
     private readonly JwtSettings _jwtSettings;
     private readonly ICacheService _redisCacheService;
     private readonly IStatisticService _statisticService;
+    private readonly List<PointRewardDocuments> _pointRewardDocuments;
 
-    public UserService(IOptions<DbSettings> myDatabaseSettings, IOptions<JwtSettings> jwtSettings, ITaskService taskService, ITappingService tappingService, ICacheService redisCacheService, IStatisticService statisticService)
+    public UserService(IOptions<DbSettings> myDatabaseSettings, IOptions<JwtSettings> jwtSettings, ITaskService taskService, ITappingService tappingService, ICacheService redisCacheService, IStatisticService statisticService, IOptions<List<PointRewardDocuments>> pointRewardDocumentOption)
         {
             _taskService = taskService;
             _tappingService = tappingService;
             _redisCacheService = redisCacheService;
             _statisticService = statisticService;
             _jwtSettings = jwtSettings.Value;
+            _pointRewardDocuments = pointRewardDocumentOption.Value;
             var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
             var database = client.GetDatabase(myDatabaseSettings.Value.DatabaseName);
             _userCollection = database.GetCollection<User>(nameof(User));
@@ -269,5 +272,56 @@ public class UserService : IUserService
         userViewModel.InfinityTapUsed = (int)_redisCacheService.GetIncrement(string.Format(Constants.GameSettings.AllowedInfinityTapRedisKey, userViewModel.TelegramId));
         userViewModel.FullEnergyRefillUsed = (int)_redisCacheService.GetIncrement(string.Format(Constants.GameSettings.AllowedFullEnergyRefillRedisKey, userViewModel.TelegramId));
         return userViewModel;
+    }
+
+    public async Task<ResponseDto<int>> GetPointRewardAsync(string userId)
+    {
+        if (!ObjectId.TryParse(userId, out _))
+            return new ResponseDto<int>()
+            {
+                Message = "Invalid Id",
+                Success = false
+            };
+
+        var user = await _userCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return new ResponseDto<int>()
+            {
+                Message = "User is not found",
+                Success = false
+            };
+        }
+
+        if (user.IsReceivePointReward) 
+        {
+            return new ResponseDto<int>()
+            {
+                Message = "This user has already received the point reward.",
+                Success = false
+            };
+        }
+
+        var point = 0;
+        var telegramId = Convert.ToDouble(user.TelegramId) / 1000000;
+        foreach (var item in _pointRewardDocuments.OrderByDescending(c => c.Year))
+        {
+            if (telegramId > item.Ids)
+            {
+                point = item.Point;
+                break;
+            }
+        }
+
+        user.IsReceivePointReward = true;
+        _ = UpdateAsync(userId, user);
+
+        return new ResponseDto<int>
+        {
+            Success = true,
+            Message = "Congratulations on receiving your bonus points!",
+            Data = point
+        };
     }
 }

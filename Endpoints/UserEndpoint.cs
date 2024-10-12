@@ -58,13 +58,17 @@ public static class UserEndpoint
                 return Results.Ok(re);
             })
             .RequireAuthorization().WithName("TonTranStatus").WithOpenApi();
-        
-        
-        // app.MapGet("/fix", async ([FromServices] IStatisticService st) =>
-        //     {
-        //         await st.Fix();
-        //         return Results.Ok("Done");
-        //     })
-        //     .WithName("Fix").WithOpenApi();
+
+
+        app.MapGet("/receive_point_reward", async ([FromServices] IUserService userService, ClaimsPrincipal userClaimsPrincipal) =>
+        {
+            var id = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
+            if (string.IsNullOrEmpty(id)) return Results.BadRequest("User not found");
+            
+            var response = await userService.GetPointRewardAsync(id);
+
+            return Results.Ok(response);
+        })
+            .RequireAuthorization().WithName("ReceivePointReward").WithOpenApi();
     }
 }
