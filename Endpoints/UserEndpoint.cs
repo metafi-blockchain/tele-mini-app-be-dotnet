@@ -68,7 +68,17 @@ public static class UserEndpoint
             var response = await userService.GetPointRewardAsync(id);
 
             return Results.Ok(response);
-        })
-            .RequireAuthorization().WithName("ReceivePointReward").WithOpenApi();
+        }).RequireAuthorization().WithName("ReceivePointReward").WithOpenApi();
+
+        app.MapPost("/list-withdraw-request", async ([FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
+        {
+            var userId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
+            
+            if (string.IsNullOrEmpty(userId)) return Results.BadRequest("User not found");
+
+            var response = await tonChainService.GetListWithdrawByUserIdAsync(userId);
+
+            return Results.Ok(response);
+        }).RequireAuthorization().WithName("ListWithdrawRequest").WithOpenApi();
     }
 }
