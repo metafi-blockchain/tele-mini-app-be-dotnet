@@ -1,9 +1,9 @@
 ﻿namespace OkCoin.API.Models
 {
-    public class PointRewardDocuments
+    public class AirdropTokenDocuments
     {
         public int Year { get; set; }
         public double Ids { get; set; } // Million
-        public int Point { get; set; }
+        public long AirdropToken { get; set; }
     }
 }
