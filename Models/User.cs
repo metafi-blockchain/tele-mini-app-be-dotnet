@@ -66,6 +66,11 @@ public class User
     public DateTime? PremiumBotAt { get; set; }
     [BsonElement("ton_balance")]
     public long TonBalance { get; set; } = 0;
+    [BsonElement("is_receive_airdrop")]
+    public bool IsReceiveAirdrop { get; set; }
+    [BsonElement("amount_token")]
+    public long AmountToken { get; set; } = 0;
+
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
         Id = Id ?? string.Empty,
@@ -86,6 +91,8 @@ public class User
         InfinityTapUsed = 0,
         HaveTapBot = HaveTapBot,
         HavePremiumBot = HavePremiumBot,
-        TonBalance = TonBalance
+        TonBalance = TonBalance,
+        IsReceiveAirdrop = IsReceiveAirdrop,
+        AmountToken = AmountToken,
     };
 }

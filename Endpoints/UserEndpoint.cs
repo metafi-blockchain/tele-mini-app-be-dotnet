@@ -58,13 +58,16 @@ public static class UserEndpoint
                 return Results.Ok(re);
             })
             .RequireAuthorization().WithName("TonTranStatus").WithOpenApi();
-        
-        
-        // app.MapGet("/fix", async ([FromServices] IStatisticService st) =>
-        //     {
-        //         await st.Fix();
-        //         return Results.Ok("Done");
-        //     })
-        //     .WithName("Fix").WithOpenApi();
+
+        app.MapPost("/list-withdraw-request", async ([FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
+        {
+            var userId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
+            
+            if (string.IsNullOrEmpty(userId)) return Results.BadRequest("User not found");
+
+            var response = await tonChainService.GetListWithdrawByUserIdAsync(userId);
+
+            return Results.Ok(response);
+        }).RequireAuthorization().WithName("ListWithdrawRequest").WithOpenApi();
     }
 }

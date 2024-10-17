@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 using OkCoin.API.Models;
+using OkCoin.API.Responses;
 using OkCoin.API.Utils;
 using OkCoin.API.ViewModels;
 
@@ -12,6 +13,7 @@ public interface ITonChainService
     Task GetTransactionsAsync();
     Task<ResponseDto<bool>> WithdrawAsync(WithdrawRequestViewModel requestViewModel, string userId);
     Task<ResponseDto<bool>> GetTranStatus(string teleId, string? timestamp = null);
+    Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId);
 }
 
 public class TonChainService : ITonChainService
@@ -275,5 +277,18 @@ public class TonChainService : ITonChainService
             Message = tran.Status == "Success" ? "Transaction successful" : "Transaction failed",
             Data = tran.Status == "Success"
         });
+    }
+
+    public async Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId)
+    {
+        var widthdraws = await _withdrawRequestCollection.Find(c => c.UserId == userId).ToListAsync();
+
+        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel { Address = c.Address, Amount = c.Amount });
+     
+        return new ResponseDto<IEnumerable<WithdrawResponseModel>>
+        {
+            Success = true,
+            Data = dataResponse
+        };
     }
 }

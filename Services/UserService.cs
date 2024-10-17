@@ -25,7 +25,7 @@ public interface IUserService
     Task<ResponseDto<TokenViewModel>> AuthenticateAsync(LoginViewModel loginViewModel);
     Task<ResponseDto<MeResponse>> MeAsync(string id);
     Task<ResponseDto<List<RefererViewModel>>> ListReferrals(string id);
-    long CountTotalUsers();
+    long CountTotalUsers(); 
 }
 
 public class UserService : IUserService
@@ -269,5 +269,5 @@ public class UserService : IUserService
         userViewModel.InfinityTapUsed = (int)_redisCacheService.GetIncrement(string.Format(Constants.GameSettings.AllowedInfinityTapRedisKey, userViewModel.TelegramId));
         userViewModel.FullEnergyRefillUsed = (int)_redisCacheService.GetIncrement(string.Format(Constants.GameSettings.AllowedFullEnergyRefillRedisKey, userViewModel.TelegramId));
         return userViewModel;
-    }
+    }  
 }

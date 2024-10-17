@@ -1,3 +1,4 @@
+using MongoDB.Bson.Serialization.Attributes;
 using OkCoin.API.Models;
 using OkCoin.API.Utils;
 
@@ -30,7 +31,8 @@ public class UserViewModel
     public bool HavePremiumBot { get; set; } = false;
     
     public long TonBalance { get; set; } = 0;
-
+    public bool IsReceiveAirdrop { get; set; }
+    public long AmountToken { get; set; } = 0;
 }
 
 public class MeResponse
