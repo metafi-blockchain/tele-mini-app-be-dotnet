@@ -2,6 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using OkCoin.API.Models;
+using OkCoin.API.Responses;
 using OkCoin.API.Services.Interfaces;
 using OkCoin.API.ViewModels;
 
@@ -11,9 +12,9 @@ namespace OkCoin.API.Services
     {
         private readonly IMongoCollection<User> _userCollection;
         private readonly IUserService _userService;
-        private readonly List<AirdropTokenDocuments> _airdropTokenDocuments;
+        private readonly AirdropTokenDocument _airdropTokenDocuments;
 
-        public AirdropTokenService(IOptions<DbSettings> myDatabaseSettings, IOptions<List<AirdropTokenDocuments>> airdropTokenDocumentOption, IUserService userService)
+        public AirdropTokenService(IOptions<DbSettings> myDatabaseSettings, IOptions<AirdropTokenDocument> airdropTokenDocumentOption, IUserService userService)
         {
             _userService = userService;
             _airdropTokenDocuments = airdropTokenDocumentOption.Value;
@@ -22,10 +23,10 @@ namespace OkCoin.API.Services
             _userCollection = database.GetCollection<User>(nameof(User));
         }
 
-        public async Task<ResponseDto<long>> GetAirdropTokenAsync(string userId)
+        public async Task<ResponseDto<AirdropTokenResponseModel>> GetAirdropTokenAsync(string userId)
         {
             if (!ObjectId.TryParse(userId, out _))
-                return new ResponseDto<long>()
+                return new ResponseDto<AirdropTokenResponseModel>()
                 {
                     Message = "Invalid Id",
                     Success = false
@@ -35,23 +36,14 @@ namespace OkCoin.API.Services
 
             if (user == null)
             {
-                return new ResponseDto<long>()
+                return new ResponseDto<AirdropTokenResponseModel>()
                 {
                     Message = "User is not found",
                     Success = false
                 };
             }
 
-            if (user.IsReceiveAirdrop)
-            {
-                return new ResponseDto<long>()
-                {
-                    Message = "This user has already received the point reward.",
-                    Success = false
-                };
-            }
-
-            return new ResponseDto<long>
+            return new ResponseDto<AirdropTokenResponseModel>
             {
                 Success = true,
                 Data = GetInitialAirdropToken(user.TelegramId)
@@ -82,13 +74,13 @@ namespace OkCoin.API.Services
             {
                 return new ResponseDto<bool>()
                 {
-                    Message = "This user has already received the point reward.",
+                    Message = "This user has already received the airdrop token.",
                     Success = false
                 };
             }
 
             user.IsReceiveAirdrop = true;
-            user.AmountToken = GetInitialAirdropToken(user.TelegramId);
+            user.AmountToken = GetInitialAirdropToken(user.TelegramId).Airdrop;
 
             _ = _userService.UpdateAsync(userId, user);
 
@@ -100,22 +92,40 @@ namespace OkCoin.API.Services
             };
         }
 
-        private long GetInitialAirdropToken(string telegramIdStr)
+        private AirdropTokenResponseModel GetInitialAirdropToken(string telegramIdStr)
         {
-            long point = 0;
+            var currentYear = DateTime.Now.Year;
+            int yearJoinTelegram = currentYear;
 
+            // convert telegramId million 
             var telegramIdDouble = Convert.ToDouble(telegramIdStr) / 1000000;
 
-            foreach (var item in _airdropTokenDocuments.OrderByDescending(c => c.Year))
+            foreach (var item in _airdropTokenDocuments.TelegramIdsThroughYears.OrderByDescending(c => c.Year))
             {
-                if (telegramIdDouble > item.Ids)
+                if (telegramIdDouble >= item.Ids)
                 {
-                    point = item.AirdropToken;
+                    yearJoinTelegram = item.Year;
                     break;
                 }
             }
 
-            return point;
+            if (yearJoinTelegram > currentYear)
+            {
+                return new AirdropTokenResponseModel
+                {
+                    Year = 0,
+                    Airdrop = 0,
+                };
+            }
+
+            var totalYear = currentYear - yearJoinTelegram;
+            var airdrop = totalYear * _airdropTokenDocuments.AirdropToken;
+
+            return new AirdropTokenResponseModel
+            {
+                Year = totalYear,
+                Airdrop = airdrop,
+            };
         }
     }
 }

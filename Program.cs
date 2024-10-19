@@ -75,8 +75,8 @@ builder.Services.Configure<TonChainSettings>(
     builder.Configuration.GetSection("TonChainSettings"));
 builder.Services.Configure<CronJobSettings>(
     builder.Configuration.GetSection("CronJobSettings"));
-builder.Services.Configure<List<AirdropTokenDocuments>>(
-    builder.Configuration.GetSection("AirdropTokenDocuments"));
+builder.Services.Configure<AirdropTokenDocument>(
+    builder.Configuration.GetSection("AirdropTokenDocument"));
 
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITappingService, TappingService>();
