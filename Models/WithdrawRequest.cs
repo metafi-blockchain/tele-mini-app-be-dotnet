@@ -10,6 +10,10 @@ public class WithdrawRequest
     public string? Id { get; set; }
     [BsonElement("user_id")]
     public string UserId { get; set; } = null!;
+    [BsonElement("t_id")]
+    public string TelegramId { get; set; } = null!;
+    [BsonElement("address")]
+    public string Address { get; set; } = null!;
     [BsonElement("amount")]
     public decimal Amount { get; set; }
     [BsonElement("currency")]
