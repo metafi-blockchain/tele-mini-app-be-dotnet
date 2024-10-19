@@ -70,6 +70,8 @@ public class User
     public bool IsReceiveAirdrop { get; set; }
     [BsonElement("amount_token")]
     public long AmountToken { get; set; } = 0;
+    [BsonElement("receive_address")]
+    public string ReceiveAddress { get; set; } = string.Empty;
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
@@ -94,5 +96,6 @@ public class User
         TonBalance = TonBalance,
         IsReceiveAirdrop = IsReceiveAirdrop,
         AmountToken = AmountToken,
+        ReceiveAddress = ReceiveAddress
     };
 }

@@ -125,6 +125,7 @@ public class TonChainService : ITonChainService
                                     user.HavePremiumBot = true;
                                     user.UpdatedAt = DateTime.UtcNow;
                                     user.PremiumBotAt = DateTime.UtcNow;
+                                    user.ReceiveAddress = transaction["in_msg"]?["source"]?["address"]?.ToString();
                                     await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
                                     
                                     await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
@@ -208,7 +209,7 @@ public class TonChainService : ITonChainService
 
     public async Task<ResponseDto<bool>> WithdrawAsync(WithdrawRequestViewModel requestViewModel, string userId)
     {
-        if(string.IsNullOrEmpty(requestViewModel.Address) || requestViewModel.Amount <= 0)
+        if(requestViewModel.Amount <= 0)
         {
             return await Task.FromResult(new ResponseDto<bool>
             {
@@ -226,6 +227,14 @@ public class TonChainService : ITonChainService
                 Message = "User not found"
             });
         }
+
+        if (string.IsNullOrEmpty(user.ReceiveAddress)){
+            return new ResponseDto<bool> {
+                Success = false,
+                Message = "You need make a deposit (for example buying AI bot) before making a withdrawal request."
+            };
+        }
+
         if(user.TonBalance < requestViewModel.Amount)
         {
             return await Task.FromResult(new ResponseDto<bool>
@@ -234,6 +243,7 @@ public class TonChainService : ITonChainService
                 Message = "Insufficient balance"
             });
         }
+
         if(user.TonBalance < Constants.GameSettings.MinimumWithdrawAmountInNanoTon)
         {
             return await Task.FromResult(new ResponseDto<bool>
@@ -243,9 +253,18 @@ public class TonChainService : ITonChainService
             });
         }
         
+        var withdrawExist = await _withdrawRequestCollection.Find(c => c.UserId == userId && c.Status == WithdrawRequestStatus.Pending.ToString()).FirstOrDefaultAsync();
+        if (withdrawExist != null) 
+        {
+            return new ResponseDto<bool>
+            {
+                Success = false,
+                Message = "You had a pending withdrawal request. Please wait for it to be completed to make another request. "
+            };
+        }
+
         var request = new WithdrawRequest()
         {
-            Address = requestViewModel.Address,
             Amount = requestViewModel.Amount,
             Currency = "TON",
             UserId = userId
@@ -281,9 +300,26 @@ public class TonChainService : ITonChainService
 
     public async Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId)
     {
+        var user = await _userCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
+        if (user == null) {
+
+            return new ResponseDto<IEnumerable<WithdrawResponseModel>>
+            {
+                Message = "User is not found",
+                Success = false
+            };
+        }
+
         var widthdraws = await _withdrawRequestCollection.Find(c => c.UserId == userId).ToListAsync();
 
-        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel { Address = c.Address, Amount = c.Amount });
+
+        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
+                                    { 
+                                        Address = user.ReceiveAddress, 
+                                        Amount = c.Amount, 
+                                        Status = c.Status, 
+                                        CreatedAt = c.CreatedAt 
+                                    });
      
         return new ResponseDto<IEnumerable<WithdrawResponseModel>>
         {
