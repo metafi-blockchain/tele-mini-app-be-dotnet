@@ -312,7 +312,7 @@ public class TonChainService : ITonChainService
             };
         }
 
-        var widthdraws = await _withdrawRequestCollection.Find(c => c.UserId == userId).ToListAsync();
+        var widthdraws = await _withdrawRequestCollection.Find(_ => true).ToListAsync();
 
 
         var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
