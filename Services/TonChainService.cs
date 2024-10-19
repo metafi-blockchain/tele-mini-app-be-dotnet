@@ -315,6 +315,7 @@ public class TonChainService : ITonChainService
 
         var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
                                     { 
+                                        TelegramId = user.TelegramId,
                                         Address = user.ReceiveAddress, 
                                         Amount = c.Amount, 
                                         Status = c.Status, 
