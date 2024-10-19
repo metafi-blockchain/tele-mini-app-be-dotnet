@@ -1,9 +1,8 @@
 ﻿namespace OkCoin.API.Models
 {
-    public class AirdropTokenDocuments
+    public class TelegramIdsThroughYears
     {
         public int Year { get; set; }
         public double Ids { get; set; } // Million
-        public long AirdropToken { get; set; }
     }
 }
