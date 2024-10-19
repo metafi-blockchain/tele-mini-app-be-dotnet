@@ -265,9 +265,11 @@ public class TonChainService : ITonChainService
 
         var request = new WithdrawRequest()
         {
+            Address = user.ReceiveAddress,
             Amount = requestViewModel.Amount,
             Currency = "TON",
-            UserId = userId
+            UserId = userId,
+            TelegramId = user.TelegramId
         };
         
         await _withdrawRequestCollection.InsertOneAsync(request);
@@ -315,8 +317,8 @@ public class TonChainService : ITonChainService
 
         var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
                                     { 
-                                        TelegramId = user.TelegramId,
-                                        Address = user.ReceiveAddress, 
+                                        TelegramId = c.TelegramId,
+                                        Address = c.Address, 
                                         Amount = c.Amount, 
                                         Status = c.Status, 
                                         CreatedAt = c.CreatedAt 
