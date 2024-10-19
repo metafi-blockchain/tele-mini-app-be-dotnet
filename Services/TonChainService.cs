@@ -313,7 +313,13 @@ public class TonChainService : ITonChainService
         var widthdraws = await _withdrawRequestCollection.Find(c => c.UserId == userId).ToListAsync();
 
 
-        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel { Address = user.ReceiveAddress, Amount = c.Amount });
+        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
+                                    { 
+                                        Address = user.ReceiveAddress, 
+                                        Amount = c.Amount, 
+                                        Status = c.Status, 
+                                        CreatedAt = c.CreatedAt 
+                                    });
      
         return new ResponseDto<IEnumerable<WithdrawResponseModel>>
         {
