@@ -92,27 +92,7 @@ public class TaskService : ITaskService
         
         var twitters = new Dictionary<string, string>()
         {
-            {"https://x.com/cristiano?s=21","Follow Cristiano Ronaldo on X"},
-            {"https://x.com/leomessisite?s=21","Follow Lionel Messi on X"},
-            {"https://x.com/kmbappe?s=21","Follow Kylian Mbappé on X"},
-            {"https://x.com/bellinghamjude?s=21","Follow Jude Bellingham on X"},
-            {"https://x.com/b_fernandes8?s=21","Follow Bruno Fernandes on X"},
-            {"https://x.com/realmadrid?s=21","Follow Real Madrid C.F. on X"},
-            {"https://x.com/fcbarcelona?s=21","Follow FC Barcelona on X"},
-            {"https://x.com/manutd?s=21","Follow Manchester United on X"},
-            {"https://x.com/mancity?s=21","Follow Manchester City on X"},
-            {"https://x.com/chelseafc?s=21","Follow Chelsea FC on X"},
-            {"https://x.com/fcbayern?s=21","Follow FC Bayern München on X"},
-            {"https://x.com/bayer04fussball?s=21","Follow Bayer 04 Leverkusen on X"},
-            {"https://x.com/juventusfc?s=21","Follow JuventusFC on X"},
-            {"https://x.com/ton_blockchain?s=21","Follow TON on X"},
-            {"https://x.com/tonkeeper?s=21","Follow Tonkeeper on X"},
-            {"https://x.com/realdogshouse?s=21","Follow Dogs Community on X"},
-            {"https://x.com/coinbase?s=21","Follow Coinbase on X"},
-            {"https://x.com/okx?s=21","Follow OKX on X"},
-            {"https://x.com/vinijr?s=21","Follow Vini Jr. on X"},
-            {"https://x.com/agarnacho7?s=21","Follow Alejandro Garnacho on X"},
-            {"https://x.com/smane_officiel?s=21","Follow Sadio Mané on X"}
+            {"https://x.com/cristiano?s=21","Follow Cristiano Ronaldo on X"}
         };
         var lst = new List<TaskItem>()
         {
