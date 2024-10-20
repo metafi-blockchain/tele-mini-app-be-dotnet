@@ -557,6 +557,32 @@ public class TaskService : ITaskService
                 }
             }
         }
+    
+        _ = InitialTaskForUsers();
+    }
+
+    private async Task InitialTaskForUsers() 
+    {
+        var users = await _userCollection.Find(_ => true).ToListAsync();
+        var userTasks = new List<MyTask>();
+        var tasks = await _taskCollection.Find(_ => true).ToListAsync();
+        foreach (var user in users)
+        {
+            var isExistUserTask = await _myTaskCollection.Find(c => c.UserId == user.Id).AnyAsync();
+            if(!isExistUserTask)
+            {
+                userTasks.AddRange(tasks.Select(c => new MyTask 
+                {
+                    TaskId = c.Id,
+                    UserId = user.Id
+                }));
+            }  
+        }
+
+        if (userTasks.Any())
+        {
+            await _myTaskCollection.InsertManyAsync(userTasks);
+        }
     }
 
     public void CreateTaskItem(TaskItem taskItem)
