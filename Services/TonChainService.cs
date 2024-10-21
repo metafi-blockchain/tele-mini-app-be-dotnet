@@ -13,7 +13,8 @@ public interface ITonChainService
     Task GetTransactionsAsync();
     Task<ResponseDto<bool>> WithdrawAsync(WithdrawRequestViewModel requestViewModel, string userId);
     Task<ResponseDto<bool>> GetTranStatus(string teleId, string? timestamp = null);
-    Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId);
+    Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId, ListWithdrawRequestViewModel request);
+    Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawAsync(ListWithdrawRequestViewModel request);
 }
 
 public class TonChainService : ITonChainService
@@ -269,7 +270,6 @@ public class TonChainService : ITonChainService
             Amount = requestViewModel.Amount,
             Currency = "TON",
             UserId = userId,
-            TelegramId = user.TelegramId
         };
         
         await _withdrawRequestCollection.InsertOneAsync(request);
@@ -300,7 +300,7 @@ public class TonChainService : ITonChainService
         });
     }
 
-    public async Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId)
+    public async Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId, ListWithdrawRequestViewModel request)
     {
         var user = await _userCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
         if (user == null) {
@@ -312,18 +312,72 @@ public class TonChainService : ITonChainService
             };
         }
 
-        var widthdraws = await _withdrawRequestCollection.Find(_ => true).ToListAsync();
+        var withdraws = request.IsGetAll
+                        ? await _withdrawRequestCollection.Find(c => c.UserId == userId).ToListAsync()
+                        : await _withdrawRequestCollection.Find(c => c.UserId == userId && c.Status.ToLower() == request.Status.ToLower()).ToListAsync();
 
+        if (!withdraws.Any())
+        {
+            return new ResponseDto<IEnumerable<WithdrawResponseModel>>
+            {
+                Success = true,
+                Data = Enumerable.Empty<WithdrawResponseModel>()
+            };
+        }
+         
 
-        var dataResponse = widthdraws.Select(c => new WithdrawResponseModel 
+        var dataResponse = withdraws.Select(c =>  new WithdrawResponseModel 
                                     { 
-                                        TelegramId = c.TelegramId,
+                                        TelegramId = user.TelegramId,
+                                        FirstName = user.FirstName,
+                                        LastName = user.LastName,
                                         Address = c.Address, 
                                         Amount = c.Amount, 
                                         Status = c.Status, 
                                         CreatedAt = c.CreatedAt 
                                     });
      
+        return new ResponseDto<IEnumerable<WithdrawResponseModel>>
+        {
+            Success = true,
+            Data = dataResponse
+        };
+    }
+
+    public async Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawAsync(ListWithdrawRequestViewModel request)
+    {
+        var withdraws = request.IsGetAll
+                        ? await _withdrawRequestCollection.Find(_ => true).ToListAsync()
+                        : await _withdrawRequestCollection.Find(c => c.Status.ToLower() == request.Status.ToLower()).ToListAsync();
+
+
+        if (!withdraws.Any())
+        {
+            return new ResponseDto<IEnumerable<WithdrawResponseModel>>
+            {
+                Success = true,
+                Data = Enumerable.Empty<WithdrawResponseModel>()
+            };
+        }
+
+        var userIds = withdraws.Select(c => c.UserId).Distinct();
+
+        var users = await _userCollection.Find(c => userIds.Contains(c.Id)).ToListAsync();
+
+        var dataResponse = withdraws.Select(c => {
+            var user = users.First(u => u.Id == c.UserId);
+            return new WithdrawResponseModel
+            {
+                TelegramId = user.TelegramId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Address = c.Address,
+                Amount = c.Amount,
+                Status = c.Status,
+                CreatedAt = c.CreatedAt
+            };
+        });
+
         return new ResponseDto<IEnumerable<WithdrawResponseModel>>
         {
             Success = true,
