@@ -39,35 +39,5 @@ public static class UserEndpoint
             })
             .RequireAuthorization().WithName("RefererList").WithOpenApi();
         
-        
-        
-        app.MapPost("/withdraw-request", async ([FromBody] WithdrawRequestViewModel withdrawRequestViewModel, [FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
-            {
-                var id = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
-                if(string.IsNullOrEmpty(id)) return Results.BadRequest("User not found");
-                var re = await tonChainService.WithdrawAsync(withdrawRequestViewModel, id);
-                return Results.Ok(re);
-            })
-            .RequireAuthorization().WithName("WithdrawRequest").WithOpenApi();
-        
-        app.MapGet("/tran-status", async ([FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal, [FromQuery]string? timestamp) =>
-            {
-                var id = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.TelegramId)?.Value;
-                if(string.IsNullOrEmpty(id)) return Results.BadRequest("User not found");
-                var re = await tonChainService.GetTranStatus(id, timestamp);
-                return Results.Ok(re);
-            })
-            .RequireAuthorization().WithName("TonTranStatus").WithOpenApi();
-
-        app.MapPost("/list-withdraw-request", async ([FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
-        {
-            var userId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
-            
-            if (string.IsNullOrEmpty(userId)) return Results.BadRequest("User not found");
-
-            var response = await tonChainService.GetListWithdrawByUserIdAsync(userId);
-
-            return Results.Ok(response);
-        }).RequireAuthorization().WithName("ListWithdrawRequest").WithOpenApi();
     }
 }
