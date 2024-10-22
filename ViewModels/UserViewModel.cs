@@ -26,7 +26,7 @@ public class UserViewModel
     public int AllowedInfinityTap { get; set; } = Constants.GameSettings.AllowedInfinityTap;
     public int AllowedFullEnergyRefill { get; set; } = Constants.GameSettings.AllowedFullEnergyRefill;
     public string UserRank { get; set; } = "Bronze";
-    
+    public bool IsAdmin { get; set; } = false;
     public bool HaveTapBot { get; set; } = false;    
     public bool HavePremiumBot { get; set; } = false;
     
