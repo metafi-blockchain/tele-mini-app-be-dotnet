@@ -96,6 +96,7 @@ public class User
         TonBalance = TonBalance,
         IsReceiveAirdrop = IsReceiveAirdrop,
         AmountToken = AmountToken,
-        ReceiveAddress = ReceiveAddress
+        ReceiveAddress = ReceiveAddress,
+        IsAdmin = IsAdmin
     };
 }

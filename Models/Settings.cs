@@ -11,7 +11,8 @@ public enum InGameTransactionType
     InfinityTapReward,
     TaskReward,
     TopUp,
-    VarCheckRevert
+    VarCheckRevert,
+    PayCommission
 }
 
 public enum WithdrawRequestStatus

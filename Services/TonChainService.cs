@@ -82,7 +82,7 @@ public class TonChainService : ITonChainService
                         Currency = "TON",
                         Status = (status?.ToLower() == "true" || status == "1") ? "Success" : "Failed",
                     };
-
+ 
                     // Convert amount from nanoTONs to TONs (divide by 1,000,000,000)
                     var amountStr = transaction["in_msg"]?["value"]?.ToString();
                     if (long.TryParse(amountStr, out long amountNanoTon))
@@ -116,82 +116,122 @@ public class TonChainService : ITonChainService
                         if(string.IsNullOrEmpty(tran.BodyText) || tran.Amount <= 0) continue;
                         tran.IsProcessed = true;
                         await _tonTransactionCollection.InsertOneAsync(tran);
-                        if (tran.Status == "Success" && tran.Amount >= Constants.GameSettings.PremiumBotPriceInNanoTon)
+
+                        if (tran.Status != "Success") 
                         {
-                            if (long.TryParse(tran.BodyText, out long telegramId))
+                            continue;
+                        }
+
+                        // transaction withdraw
+                        if (tran.TransactionType == "Sent")
+                        {
+                            var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
+                            if (user is null) continue;
+                            
+                            // update status in list withdraw by userId
+                            var withdrawRequest = await _withdrawRequestCollection.Find(c => c.UserId == user.Id && c.Status == WithdrawRequestStatus.Pending.ToString() && c.Amount <= tran.Amount).FirstOrDefaultAsync();
+
+                            if (withdrawRequest is not null)
                             {
-                                var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
-                                if (user != null)
+                                user.TonBalance -= tran.Amount;
+                                withdrawRequest.Status = WithdrawRequestStatus.Completed.ToString();
+
+                                await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
+                                await _withdrawRequestCollection.ReplaceOneAsync(c => c.Id == withdrawRequest.Id, withdrawRequest);
+
+                                await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
                                 {
-                                    user.HavePremiumBot = true;
-                                    user.UpdatedAt = DateTime.UtcNow;
-                                    user.PremiumBotAt = DateTime.UtcNow;
-                                    user.ReceiveAddress = transaction["in_msg"]?["source"]?["address"]?.ToString();
-                                    await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
-                                    
-                                    await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
+                                    Amount = tran.Amount,
+                                    Status = "Success",
+                                    UserId = user.Id,
+                                    TransactionType = InGameTransactionType.PayCommission.ToString(),
+                                    Currency = "TON"
+                                });
+                            }
+                        }
+                        else
+                        {
+                            if (tran.Amount >= Constants.GameSettings.PremiumBotPriceInNanoTon)
+                            {
+                                if (long.TryParse(tran.BodyText, out long telegramId))
+                                {
+                                    var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
+                                    if (user != null)
                                     {
-                                        Amount = tran.Amount,
-                                        Status = "Success",
-                                        UserId = user.Id,
-                                        TransactionType = InGameTransactionType.TopUp.ToString(),
-                                        Currency = "TON"
-                                    });
-                                    await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
-                                    {
-                                        Amount = Constants.GameSettings.PremiumBotPriceInNanoTon * -1,
-                                        Status = "Success",
-                                        UserId = user.Id,
-                                        TransactionType = InGameTransactionType.BuyPremium.ToString(),
-                                        Currency = "TON",
-                                        Description = "Buy Premium Bot"
-                                    });
-                                    
-                                    // + 0.1 TON to the referrer level 1 and 0.05 TON to the referrer level 2
-                                    if (Constants.GameSettings.TonRewardForReferralLevel1 > 0)
-                                    {
-                                        var referrer = await _userCollection.Find(x => x.TelegramId == user.RefererId).FirstOrDefaultAsync();
-                                        if (referrer != null)
+                                        user.HavePremiumBot = true;
+                                        user.UpdatedAt = DateTime.UtcNow;
+                                        user.PremiumBotAt = DateTime.UtcNow;
+
+                                        user.ReceiveAddress = transaction["in_msg"]?["source"]?["address"]?.ToString();
+
+                                        await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
+                                        
+                                        await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
                                         {
-                                            const long ref1Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel1 * Constants.GameSettings.TonInNano);
-                                            referrer.TonBalance += ref1Amount;
-                                            referrer.UpdatedAt = DateTime.UtcNow;
-                                            await _userCollection.ReplaceOneAsync(x => x.Id == referrer.Id, referrer);
-                                            await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
+                                            Amount = tran.Amount,
+                                            Status = "Success",
+                                            UserId = user.Id,
+                                            TransactionType = InGameTransactionType.TopUp.ToString(),
+                                            Currency = "TON"
+                                        });
+                                        await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
+                                        {
+                                            Amount = Constants.GameSettings.PremiumBotPriceInNanoTon * -1,
+                                            Status = "Success",
+                                            UserId = user.Id,
+                                            TransactionType = InGameTransactionType.BuyPremium.ToString(),
+                                            Currency = "TON",
+                                            Description = "Buy Premium Bot"
+                                        });
+                                        
+                                        // + 0.1 TON to the referrer level 1 and 0.05 TON to the referrer level 2
+                                        if (Constants.GameSettings.TonRewardForReferralLevel1 > 0)
+                                        {
+                                            var referrer = await _userCollection.Find(x => x.TelegramId == user.RefererId).FirstOrDefaultAsync();
+                                            if (referrer != null)
                                             {
-                                                Amount = ref1Amount,
-                                                Status = "Success",
-                                                UserId = referrer.Id,
-                                                TransactionType = InGameTransactionType.ReferralReward.ToString(),
-                                                Currency = "TON",
-                                                Description = $"Referral reward level 1 from {user.TelegramId} - {user.TelegramUsername}"
-                                            });
-                                            if (!string.IsNullOrEmpty(referrer.RefererId))
-                                            {
-                                                var referrer2 = await _userCollection.Find(x => x.TelegramId == referrer.RefererId).FirstOrDefaultAsync();
-                                                if (referrer2 != null)
+                                                const long ref1Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel1 * Constants.GameSettings.TonInNano);
+                                                referrer.TonBalance += ref1Amount;
+                                                referrer.UpdatedAt = DateTime.UtcNow;
+                                                await _userCollection.ReplaceOneAsync(x => x.Id == referrer.Id, referrer);
+                                                await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
                                                 {
-                                                    const long ref2Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel2 * Constants.GameSettings.TonInNano);
-                                                    referrer2.TonBalance += ref2Amount;
-                                                    referrer2.UpdatedAt = DateTime.UtcNow;
-                                                    await _userCollection.ReplaceOneAsync(x => x.Id == referrer2.Id, referrer2);
-                                                    
-                                                    await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
+                                                    Amount = ref1Amount,
+                                                    Status = "Success",
+                                                    UserId = referrer.Id,
+                                                    TransactionType = InGameTransactionType.ReferralReward.ToString(),
+                                                    Currency = "TON",
+                                                    Description = $"Referral reward level 1 from {user.TelegramId} - {user.TelegramUsername}"
+                                                });
+                                                if (!string.IsNullOrEmpty(referrer.RefererId))
+                                                {
+                                                    var referrer2 = await _userCollection.Find(x => x.TelegramId == referrer.RefererId).FirstOrDefaultAsync();
+                                                    if (referrer2 != null)
                                                     {
-                                                        Amount = ref2Amount,
-                                                        Status = "Success",
-                                                        UserId = referrer.Id,
-                                                        TransactionType = InGameTransactionType.ReferralReward.ToString(),
-                                                        Currency = "TON",
-                                                        Description = $"Referral reward level 2 from {referrer.TelegramId} - {referrer.TelegramUsername}"
-                                                    });
+                                                        const long ref2Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel2 * Constants.GameSettings.TonInNano);
+                                                        referrer2.TonBalance += ref2Amount;
+                                                        referrer2.UpdatedAt = DateTime.UtcNow;
+                                                        await _userCollection.ReplaceOneAsync(x => x.Id == referrer2.Id, referrer2);
+                                                        
+                                                        await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
+                                                        {
+                                                            Amount = ref2Amount,
+                                                            Status = "Success",
+                                                            UserId = referrer.Id,
+                                                            TransactionType = InGameTransactionType.ReferralReward.ToString(),
+                                                            Currency = "TON",
+                                                            Description = $"Referral reward level 2 from {referrer.TelegramId} - {referrer.TelegramUsername}"
+                                                        });
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        }
+                            }        
+                        } 
+
+                        
                     }
 
                     if (index == 1)
@@ -324,7 +364,6 @@ public class TonChainService : ITonChainService
                 Data = Enumerable.Empty<WithdrawResponseModel>()
             };
         }
-         
 
         var dataResponse = withdraws.Select(c =>  new WithdrawResponseModel 
                                     { 

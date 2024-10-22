@@ -28,7 +28,8 @@ public class TonTransaction
     [BsonElement("text")]
     public string BodyText { get; set; }
 
-    [BsonElement("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    [BsonElement("created_at")] 
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     [BsonElement("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     [BsonElement("is_processed")]
