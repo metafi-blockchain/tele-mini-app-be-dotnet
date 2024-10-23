@@ -10,7 +10,14 @@ using OkCoin.API.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder => {
+        builder.AllowAnyOrigin();
+        builder.AllowAnyMethod();
+        builder.AllowAnyHeader();
+    });
+});
 builder.Services.AddAuthentication().AddJwtBearer(op =>
 {
     op.TokenValidationParameters = new TokenValidationParameters
@@ -88,14 +95,8 @@ builder.Services.AddScoped<IAirdropTokenService, AirdropTokenService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<BackgroundCronJobService>();
 var app = builder.Build();
-app.UseCors(o =>
-{
-    o.AllowAnyOrigin();
-    o.AllowAnyMethod();
-    o.AllowAnyHeader();
-});
-app.UseAuthentication();
-app.UseAuthorization();
+
+
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
@@ -106,12 +107,17 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseRouting();
 
+app.UseCors();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapUserEndpoint();
 app.MapBoostEndpoint();
 app.MapTapEndpoint();
 app.MapOtherEndpoint();
 app.MapAirdropTokenEndpoint();
-app.MapTonChainEndpointt();
+app.MapTonChainEndpoint();
 
 app.Run();

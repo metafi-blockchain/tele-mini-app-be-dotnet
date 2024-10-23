@@ -8,7 +8,7 @@ namespace OkCoin.API.Endpoints
 {
     public static class TonChainEndpoint
     {
-        public static void MapTonChainEndpointt(this WebApplication app)
+        public static void MapTonChainEndpoint(this WebApplication app)
         {
             app.MapPost("/withdraw-request", async ([FromBody] WithdrawRequestViewModel withdrawRequestViewModel, [FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
             {
