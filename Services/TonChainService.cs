@@ -67,7 +67,8 @@ public class TonChainService : ITonChainService
                     var transactionHash = transaction["hash"]?.ToString();
                     var logicalTime = transaction["lt"]?.ToString();
                     // Check if the transaction is incoming or outgoing
-                    var isOutgoing = transaction["in_msg"]?["source"]?["address"]?.ToString() == _tonChainSettings.WalletAddress;
+                    var sourceAddress = transaction["in_msg"]?["source"]?["address"]?.ToString() ;
+                    var isOutgoing = string.IsNullOrEmpty(sourceAddress) || sourceAddress == _tonChainSettings.WalletAddress;
                     // Decoded body text
                     var decodedBody = transaction["in_msg"]?["decoded_body"]?["text"]?.ToString();
                     var status = transaction["success"]?.ToString();
@@ -75,7 +76,7 @@ public class TonChainService : ITonChainService
                     var tran = new TonTransaction()
                     {
                         TransactionHash = transactionHash ?? "",
-                        FromAddress = transaction["in_msg"]?["source"]?["address"]?.ToString(),
+                        FromAddress = sourceAddress,
                         ToAddress = transaction["in_msg"]?["destination"]?["address"]?.ToString(),
                         TransactionType = isOutgoing ? "Sent" : "Received",
                         BodyText = decodedBody ?? "",
