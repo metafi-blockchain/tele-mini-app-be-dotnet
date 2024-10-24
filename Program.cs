@@ -103,6 +103,8 @@ var app = builder.Build();
 //     app.UseSwagger();
 //     app.UseSwaggerUI();
 // }
+app.UsePathBase("/api");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
