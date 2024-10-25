@@ -195,7 +195,8 @@ public class TonChainService : ITonChainService
         if (withdrawRequest is not null)
         {
             Console.WriteLine($"Withdraw request = {JsonConvert.SerializeObject(withdrawRequest)}");
-            user.TonBalance -= tran.Amount;
+
+            user.TonBalance = user.TonBalance < tran.Amount ? 0 : user.TonBalance - tran.Amount;
 
             withdrawRequest.Status = WithdrawRequestStatus.Completed.ToString();
 
