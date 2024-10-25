@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OkCoin.API.Models;
 using OkCoin.API.Responses;
@@ -22,17 +23,19 @@ public class TonChainService : ITonChainService
     private readonly HttpClient _httpClient;
     private readonly ICacheService _redisCacheService;
     private readonly TonChainSettings _tonChainSettings;
+    private readonly ILogger<TonChainService> _logger;
     private readonly IMongoCollection<TonTransaction> _tonTransactionCollection;
     private readonly IMongoCollection<WithdrawRequest> _withdrawRequestCollection;
     private readonly IMongoCollection<User> _userCollection;
     private readonly IStatisticService _statisticService;
 
-    public TonChainService(IOptions<DbSettings> myDatabaseSettings, HttpClient httpClient, ICacheService redisCacheService, IOptions<TonChainSettings> tonChainSettings, IStatisticService statisticService)
+    public TonChainService(ILogger<TonChainService> logger, IOptions<DbSettings> myDatabaseSettings, HttpClient httpClient, ICacheService redisCacheService, IOptions<TonChainSettings> tonChainSettings, IStatisticService statisticService)
     {
         _httpClient = httpClient;
         _redisCacheService = redisCacheService;
         _statisticService = statisticService;
         _tonChainSettings = tonChainSettings.Value;
+        _logger = logger;
         var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
         var database = client.GetDatabase(myDatabaseSettings.Value.DatabaseName);
         _tonTransactionCollection = database.GetCollection<TonTransaction>(nameof(TonTransaction));
@@ -42,6 +45,7 @@ public class TonChainService : ITonChainService
 
     public async Task GetTransactionsAsync()
     {
+        _logger.LogInformation($"{nameof(GetTransactionsAsync)} - Start.");
         var lastBlock = await _redisCacheService.GetAsync<string>("TONLastBlockTime");
         var baseUrl = _tonChainSettings.IsMainNet ? "https://tonapi.io" : "https://testnet.tonapi.io";
         var apiUrl = $"{baseUrl}/v2/blockchain/accounts/{_tonChainSettings.WalletAddress}/transactions?limit=100&sort_order=desc";
@@ -66,7 +70,7 @@ public class TonChainService : ITonChainService
                     index++;
                     
                     var tran = GetTonTransaction(transaction);
-                    
+                    _logger.LogInformation($"transaction = {JsonConvert.SerializeObject(tran)}");
                     var existingTran = await _tonTransactionCollection.Find(x => x.TransactionHash == tran.TransactionHash).FirstOrDefaultAsync();
 
                     if (existingTran != null)
@@ -181,14 +185,16 @@ public class TonChainService : ITonChainService
 
     private async Task UpdateInfoWithTransactionSent(TonTransaction tran)
     {
+        _logger.LogInformation($"{nameof(UpdateInfoWithTransactionSent)} - Start");
         var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
         if (user is null) return;
         
         // update status in list withdraw by userId
         var withdrawRequest = await _withdrawRequestCollection.Find(c => c.UserId == user.Id && c.Status == WithdrawRequestStatus.Pending.ToString() && c.Amount <= tran.Amount).FirstOrDefaultAsync();
-
+        
         if (withdrawRequest is not null)
         {
+            _logger.LogInformation($"Withdraw request = {JsonConvert.SerializeObject(withdrawRequest)}");
             user.TonBalance -= tran.Amount;
 
             withdrawRequest.Status = WithdrawRequestStatus.Completed.ToString();
@@ -206,10 +212,12 @@ public class TonChainService : ITonChainService
                 Currency = "TON"
             });
         }
+         _logger.LogInformation($"{nameof(UpdateInfoWithTransactionSent)} - End.");
     }
 
     private async Task UpdateInfoWithTransactionReceived(TonTransaction tran)
     {
+        _logger.LogInformation($"{nameof(UpdateInfoWithTransactionReceived)} - Start");
         if (tran.Amount >= Constants.GameSettings.PremiumBotPriceInNanoTon)
         {
             if (long.TryParse(tran.BodyText, out long telegramId))
@@ -253,6 +261,8 @@ public class TonChainService : ITonChainService
                 }
             }
         }        
+
+        _logger.LogInformation($"{nameof(UpdateInfoWithTransactionReceived)} - End");
     }
 
     private async Task TonRewardForReferral(User user)
