@@ -2,7 +2,9 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using OkCoin.API.Enums;
 using OkCoin.API.Models;
+using OkCoin.API.Options;
 using OkCoin.API.Responses;
 using OkCoin.API.Utils;
 using OkCoin.API.ViewModels;
@@ -16,26 +18,28 @@ public interface ITonChainService
     Task<ResponseDto<bool>> GetTranStatus(string teleId, string? timestamp = null);
     Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId, ListWithdrawRequestViewModel request);
     Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawAsync(ListWithdrawRequestViewModel request);
+
+    Task MigrateWalletAddressReceiveForOldUserAsync();
 }
 
 public class TonChainService : ITonChainService
 {
-    private readonly HttpClient _httpClient;
+    private readonly IExternalClientService _externalClientService;
     private readonly ICacheService _redisCacheService;
     private readonly TonChainSettings _tonChainSettings;
-    private readonly ILogger<TonChainService> _logger;
+    private readonly EndpointsOutSideOption _endpointsOutSideOption;
     private readonly IMongoCollection<TonTransaction> _tonTransactionCollection;
     private readonly IMongoCollection<WithdrawRequest> _withdrawRequestCollection;
     private readonly IMongoCollection<User> _userCollection;
     private readonly IStatisticService _statisticService;
 
-    public TonChainService(ILogger<TonChainService> logger, IOptions<DbSettings> myDatabaseSettings, HttpClient httpClient, ICacheService redisCacheService, IOptions<TonChainSettings> tonChainSettings, IStatisticService statisticService)
+    public TonChainService(IOptions<DbSettings> myDatabaseSettings, IExternalClientService externalClientService, ICacheService redisCacheService, IOptions<TonChainSettings> tonChainSettings, IStatisticService statisticService, IOptions<EndpointsOutSideOption> endpointsOutSideOption)
     {
-        _httpClient = httpClient;
+        _externalClientService = externalClientService;
         _redisCacheService = redisCacheService;
         _statisticService = statisticService;
         _tonChainSettings = tonChainSettings.Value;
-        _logger = logger;
+        _endpointsOutSideOption = endpointsOutSideOption.Value;
         var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
         var database = client.GetDatabase(myDatabaseSettings.Value.DatabaseName);
         _tonTransactionCollection = database.GetCollection<TonTransaction>(nameof(TonTransaction));
@@ -47,20 +51,10 @@ public class TonChainService : ITonChainService
     {
         Console.WriteLine($"{nameof(GetTransactionsAsync)} - Start.");
         var lastBlock = await _redisCacheService.GetAsync<string>("TONLastBlockTime");
-        var baseUrl = _tonChainSettings.IsMainNet ? "https://tonapi.io" : "https://testnet.tonapi.io";
-        var apiUrl = $"{baseUrl}/v2/blockchain/accounts/{_tonChainSettings.WalletAddress}/transactions?limit=100&sort_order=desc";
-        if(!string.IsNullOrEmpty(lastBlock)) apiUrl += "&after_lt=" + lastBlock;
+        
         try
         {
-            // Send GET request to the API
-            var response = await _httpClient.GetAsync(apiUrl);
-            response.EnsureSuccessStatusCode();
-            // Read the response
-            var responseBody = await response.Content.ReadAsStringAsync();
-
-            // Parse the JSON response
-            var json = JObject.Parse(responseBody);
-            var transactions = json["transactions"];
+            var transactions = await GetHistoryTransactionFromOutside(lastBlock);
 
             // Iterate through each transaction and extract the required details
             var index = 0;
@@ -91,12 +85,12 @@ public class TonChainService : ITonChainService
 
                         await _tonTransactionCollection.InsertOneAsync(tran);
 
-                        if (tran.Status != "Success") 
+                        if (tran.Status != TransactionState.Success.ToString()) 
                         {
                             continue;
                         }
                         
-                        if (tran.TransactionType == "Sent")
+                        if (tran.TransactionType == TransactionState.Sent.ToString())
                         {
                             // transaction withdraw
                             await UpdateInfoWithTransactionSent(tran);
@@ -121,6 +115,29 @@ public class TonChainService : ITonChainService
         {
             Console.WriteLine("Request error: " + e.Message);
         }
+    }
+
+    public async Task<JToken?> GetHistoryTransactionFromOutside(string? lastBlock)
+    {
+        try
+        {
+            var baseUrl = _tonChainSettings.IsMainNet ? _endpointsOutSideOption.MainNet : _endpointsOutSideOption.TestNet;
+            
+            var apiUrl = $"{baseUrl}/v2/blockchain/accounts/{_tonChainSettings.WalletAddress}/transactions?limit=100&sort_order=desc";
+            
+            if(!string.IsNullOrEmpty(lastBlock)) apiUrl += "&after_lt=" + lastBlock;
+
+            var transactionJson = await _externalClientService.GetDataAsync<JObject>(apiUrl);
+            
+            var transactions = transactionJson["transactions"];
+
+            return transactions;
+        }
+        catch (System.Exception ex)
+        {
+             Console.WriteLine($"{nameof(GetHistoryTransactionFromOutside)} - Error: {ex.Message}");
+             return null;
+        } 
     }
 
     private TonTransaction GetTonTransaction(JToken transaction)
@@ -157,10 +174,10 @@ public class TonChainService : ITonChainService
             TransactionHash = transactionHash ?? "",
             FromAddress = sourceAddress,
             ToAddress = toAddress,
-            TransactionType = isOutgoing ? "Sent" : "Received",
+            TransactionType = isOutgoing ? TransactionState.Sent.ToString() : TransactionState.Received.ToString(),
             BodyText = decodedBody ?? "",
             Currency = "TON",
-            Status = (status?.ToLower() == "true" || status == "1") ? "Success" : "Failed",
+            Status = (status?.ToLower() == "true" || status == "1") ? TransactionState.Success.ToString() : TransactionState.Failed.ToString(),
         };
         
         if (long.TryParse(amountStr, out long amountNanoTon))
@@ -231,7 +248,8 @@ public class TonChainService : ITonChainService
                     user.UpdatedAt = DateTime.UtcNow;
                     user.PremiumBotAt = DateTime.UtcNow;
 
-                    user.ReceiveAddress = tran.FromAddress;
+                    var address = await GetWalletAddressDetailFromOutside(tran.FromAddress);
+                    user.ReceiveAddress = JsonConvert.SerializeObject(address);
 
                     await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
                     
@@ -264,6 +282,27 @@ public class TonChainService : ITonChainService
         }        
 
         Console.WriteLine($"{nameof(UpdateInfoWithTransactionReceived)} - End");
+    }
+
+    private async Task<AddressModel> GetWalletAddressDetailFromOutside(string address)
+    {
+        var response = new AddressModel{Hex = address};
+        try
+        {
+            var endpoint = $"{_endpointsOutSideOption.WalletAddressDetail}/{address}";
+            var addressDetail = await _externalClientService.GetDataAsync<JObject>(endpoint);
+            if (addressDetail != null)
+            {
+                response.MainNet = addressDetail["mainnet"]?["base64urlsafe"]?["non_bounceable"].ToString();
+                response.TestNet = addressDetail["testnet"]?["base64urlsafe"]?["non_bounceable"].ToString();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine($"{nameof(GetWalletAddressDetailFromOutside)} - Error: {ex.Message}");
+        }
+
+        return response;
     }
 
     private async Task TonRewardForReferral(User user)
@@ -493,5 +532,50 @@ public class TonChainService : ITonChainService
             Success = true,
             Data = dataResponse
         };
+    }
+
+    public async Task MigrateWalletAddressReceiveForOldUserAsync()
+    {
+        Console.WriteLine($"{nameof(MigrateWalletAddressReceiveForOldUserAsync)} - Start");
+        try
+        {
+            var transactions = await GetHistoryTransactionFromOutside("0");
+
+            if (transactions == null)
+            {
+                Console.WriteLine($"{nameof(MigrateWalletAddressReceiveForOldUserAsync)} - transactions are empty.");
+                return;
+            }
+
+            foreach (var transaction in transactions)
+            {
+                var tran = GetTonTransaction(transaction);
+
+                if(tran.Status != TransactionState.Success.ToString() 
+                    || tran.TransactionType != TransactionState.Received.ToString()
+                    || string.IsNullOrEmpty(tran.BodyText) 
+                    || tran.Amount < Constants.GameSettings.PremiumBotPriceInNanoTon) 
+                {
+                    continue;
+                }
+
+                
+                var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
+                
+                if (user == null)
+                {
+                    continue;
+                }
+
+                var address = await GetWalletAddressDetailFromOutside(tran.FromAddress);
+                user.ReceiveAddress = JsonConvert.SerializeObject(address);   
+
+                await _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine($"{nameof(MigrateWalletAddressReceiveForOldUserAsync)} - Error: {ex.Message}");
+        }
     }
 }

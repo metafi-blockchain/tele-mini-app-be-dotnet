@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using OkCoin.API.Endpoints;
 using OkCoin.API.Models;
+using OkCoin.API.Options;
 using OkCoin.API.Services;
 using OkCoin.API.Services.Interfaces;
 using OkCoin.API.Utils;
@@ -84,6 +85,8 @@ builder.Services.Configure<CronJobSettings>(
     builder.Configuration.GetSection("CronJobSettings"));
 builder.Services.Configure<AirdropTokenDocument>(
     builder.Configuration.GetSection("AirdropTokenDocument"));
+builder.Services.Configure<EndpointsOutSideOption>(
+    builder.Configuration.GetSection(EndpointsOutSideOption.Key));
 
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<ITappingService, TappingService>();
@@ -92,6 +95,7 @@ builder.Services.AddSingleton<ICacheService, RedisCacheService>();
 builder.Services.AddSingleton<IStatisticService, StatisticService>();
 builder.Services.AddSingleton<ITonChainService, TonChainService>();
 builder.Services.AddScoped<IAirdropTokenService, AirdropTokenService>();
+builder.Services.AddSingleton<IExternalClientService, ExternalClientService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<BackgroundCronJobService>();
 var app = builder.Build();

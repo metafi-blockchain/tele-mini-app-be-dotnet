@@ -55,6 +55,20 @@ namespace OkCoin.API.Endpoints
 
                 return Results.Ok(response);
             }).RequireAuthorization().WithName("ListUserWithdrawRequest").WithOpenApi();
+
+            
+            app.MapGet("/migrate-receive-address", async ([FromServices] ITonChainService tonChainService, ClaimsPrincipal userClaimsPrincipal) =>
+            {
+                var userId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
+
+                if (string.IsNullOrEmpty(userId)) return Results.BadRequest("User not found");
+
+                await tonChainService.MigrateWalletAddressReceiveForOldUserAsync();
+
+                return Results.Ok("done");
+            }).RequireAuthorization().WithName("MigrateReceiveAddress").WithOpenApi();
+
+
         }
     }
 }
