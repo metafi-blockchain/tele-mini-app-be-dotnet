@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using OkCoin.API.Enums;
+using OkCoin.API.Extensions;
 using OkCoin.API.Models;
 using OkCoin.API.Options;
 using OkCoin.API.Responses;
@@ -63,43 +64,46 @@ public class TonChainService : ITonChainService
                 {
                     index++;
                     
-                    var tran = GetTonTransaction(transaction);
-                    Console.WriteLine($"transaction = {JsonConvert.SerializeObject(tran)}");
-                    var existingTran = await _tonTransactionCollection.Find(x => x.TransactionHash == tran.TransactionHash).FirstOrDefaultAsync();
-
-                    if (existingTran != null)
+                    var tonTransactions = GetTonTransactions(transaction);
+                    foreach (var tran in tonTransactions)
                     {
-                        // Update the existing transaction
-                        tran.Id = existingTran.Id;
-                        tran.IsProcessed = true;
-                        tran.CreatedAt = existingTran.CreatedAt;
-                        tran.UpdatedAt = DateTime.UtcNow;
-                        await _tonTransactionCollection.ReplaceOneAsync(x => x.Id == tran.Id, tran);
-                    }
-                    else
-                    {
-                        // Save the transaction to the database
-                        if(string.IsNullOrEmpty(tran.BodyText) || tran.Amount <= 0) continue;
+                        Console.WriteLine($"transaction = {JsonConvert.SerializeObject(tran)}");
+                        var existingTran = await _tonTransactionCollection.Find(x => x.TransactionHash == tran.TransactionHash).FirstOrDefaultAsync();
 
-                        tran.IsProcessed = true;
-
-                        await _tonTransactionCollection.InsertOneAsync(tran);
-
-                        if (tran.Status != TransactionState.Success.ToString()) 
+                        if (existingTran != null)
                         {
-                            continue;
-                        }
-                        
-                        if (tran.TransactionType == TransactionState.Sent.ToString())
-                        {
-                            // transaction withdraw
-                            await UpdateInfoWithTransactionSent(tran);
+                            // Update the existing transaction
+                            tran.Id = existingTran.Id;
+                            tran.IsProcessed = true;
+                            tran.CreatedAt = existingTran.CreatedAt;
+                            tran.UpdatedAt = DateTime.UtcNow;
+                            await _tonTransactionCollection.ReplaceOneAsync(x => x.Id == tran.Id, tran);
                         }
                         else
                         {
-                            // transaction deposit
-                            await UpdateInfoWithTransactionReceived(tran);
-                        } 
+                            // Save the transaction to the database
+                            if(string.IsNullOrEmpty(tran.BodyText) || tran.Amount <= 0) continue;
+
+                            tran.IsProcessed = true;
+
+                            await _tonTransactionCollection.InsertOneAsync(tran);
+
+                            if (tran.Status != TransactionState.Success.ToString()) 
+                            {
+                                continue;
+                            }
+                            
+                            if (tran.TransactionType == TransactionState.Sent.ToString())
+                            {
+                                // transaction withdraw
+                                await UpdateInfoWithTransactionSent(tran);
+                            }
+                            else
+                            {
+                                // transaction deposit
+                                await UpdateInfoWithTransactionReceived(tran);
+                            } 
+                        }
                     }
 
                     if (index == 1)
@@ -140,64 +144,53 @@ public class TonChainService : ITonChainService
         } 
     }
 
-    private TonTransaction GetTonTransaction(JToken transaction)
+    private List<TonTransaction> GetTonTransactions(JToken transaction, bool isGetAll = true)
     {
+        var trans = new List<TonTransaction>();
         var transactionHash = transaction["hash"]?.ToString();
-                    
-        var sourceAddress = string.Empty;
-        var toAddress = string.Empty;
-        var decodedBody = string.Empty;
-        var amountStr = string.Empty;
         var outMessage = transaction["out_msgs"];
         var isOutgoing = outMessage != null && outMessage.Any();
+        var status = transaction["success"]?.ToString();
+        var transactionType = isOutgoing ? TransactionState.Sent.ToString() : TransactionState.Received.ToString();
+        var fee = transaction["total_fees"].ToString().StringToLong();
 
         if (isOutgoing)
         {
+            if (!isGetAll) return trans;
+
             // sent
-            toAddress =  outMessage[0]?["destination"]?["address"]?.ToString();
-            sourceAddress =  outMessage[0]?["source"]?["address"]?.ToString();
-            decodedBody = outMessage[0]?["decoded_body"]?["text"]?.ToString();
-            amountStr = outMessage[0]?["value"]?.ToString();
-        }else
+            trans.AddRange(outMessage.Select(c => new TonTransaction{
+                TransactionHash = transactionHash ?? "",
+                FromAddress = c["source"]?["address"]?.ToString(),
+                ToAddress = c["destination"]?["address"]?.ToString(),
+                TransactionType = transactionType,
+                BodyText = c["decoded_body"]?["text"]?.ToString() ?? "",
+                Currency = "TON",
+                Status = (status?.ToLower() == "true" || status == "1") ? TransactionState.Success.ToString() : TransactionState.Failed.ToString(),
+                Amount = c["value"].ToString().StringToLong(),
+                Fee = fee
+            }));
+        }
+        else
         {
             // received
-            toAddress =  transaction["in_msg"]?["destination"]?["address"]?.ToString();
-            sourceAddress =  transaction["in_msg"]?["source"]?["address"]?.ToString();
-            decodedBody = transaction["in_msg"]?["decoded_body"]?["text"]?.ToString();
-            amountStr = transaction["in_msg"]?["value"]?.ToString();
+
+            var amountStr = transaction["in_msg"]?["value"]?.ToString();
+
+            trans.Add(new TonTransaction{
+                TransactionHash = transactionHash ?? "",
+                FromAddress = transaction["in_msg"]?["source"]?["address"]?.ToString(),
+                ToAddress = transaction["in_msg"]?["destination"]?["address"]?.ToString(),
+                TransactionType = isOutgoing ? TransactionState.Sent.ToString() : TransactionState.Received.ToString(),
+                BodyText = transaction["in_msg"]?["decoded_body"]?["text"]?.ToString() ?? "",
+                Currency = "TON",
+                Status = (status?.ToLower() == "true" || status == "1") ? TransactionState.Success.ToString() : TransactionState.Failed.ToString(),
+                Amount = amountStr.StringToLong(),
+                Fee = fee
+            });
         }  
-
-        var status = transaction["success"]?.ToString();
-
-        var tran = new TonTransaction()
-        {
-            TransactionHash = transactionHash ?? "",
-            FromAddress = sourceAddress,
-            ToAddress = toAddress,
-            TransactionType = isOutgoing ? TransactionState.Sent.ToString() : TransactionState.Received.ToString(),
-            BodyText = decodedBody ?? "",
-            Currency = "TON",
-            Status = (status?.ToLower() == "true" || status == "1") ? TransactionState.Success.ToString() : TransactionState.Failed.ToString(),
-        };
         
-        if (long.TryParse(amountStr, out long amountNanoTon))
-        {
-            tran.Amount = amountNanoTon;
-            //var amountTon = amountNanoTon / 1_000_000_000m;
-            //var formattedAmount = amountTon.ToString("F2");
-        }
-
-        // Transaction fee (if available)
-        var feeStr = transaction["total_fees"]?.ToString();
-
-        if (long.TryParse(feeStr, out long feeNanoTon))
-        {
-            tran.Fee = feeNanoTon;
-            //var feeTon = feeNanoTon / 1_000_000_000m;
-            //var formattedFee = feeTon.ToString("F2");
-        }
-
-        return tran;
+        return trans;
     }
 
     private async Task UpdateInfoWithTransactionSent(TonTransaction tran)
@@ -549,28 +542,31 @@ public class TonChainService : ITonChainService
 
             foreach (var transaction in transactions)
             {
-                var tran = GetTonTransaction(transaction);
+                var tonTransactions = GetTonTransactions(transaction, false);
 
-                if(tran.Status != TransactionState.Success.ToString() 
-                    || tran.TransactionType != TransactionState.Received.ToString()
-                    || string.IsNullOrEmpty(tran.BodyText) 
-                    || tran.Amount < Constants.GameSettings.PremiumBotPriceInNanoTon) 
+                foreach (var tran in tonTransactions)
                 {
-                    continue;
+                    if(tran.Status != TransactionState.Success.ToString() 
+                        || tran.TransactionType != TransactionState.Received.ToString()
+                        || string.IsNullOrEmpty(tran.BodyText) 
+                        || tran.Amount < Constants.GameSettings.PremiumBotPriceInNanoTon) 
+                    {
+                        continue;
+                    }
+                    
+                    var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
+                    
+                    if (user == null)
+                    {
+                        continue;
+                    }
+
+                    var address = await GetWalletAddressDetailFromOutside(tran.FromAddress);
+                    user.ReceiveAddress = JsonConvert.SerializeObject(address);   
+
+                    await _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
                 }
-
                 
-                var user = await _userCollection.Find(x => x.TelegramId == tran.BodyText).FirstOrDefaultAsync();
-                
-                if (user == null)
-                {
-                    continue;
-                }
-
-                var address = await GetWalletAddressDetailFromOutside(tran.FromAddress);
-                user.ReceiveAddress = JsonConvert.SerializeObject(address);   
-
-                await _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
             }
         }
         catch (System.Exception ex)
