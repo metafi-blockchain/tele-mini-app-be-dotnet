@@ -147,7 +147,7 @@ public class TonChainService : ITonChainService
     private List<TonTransaction> GetTonTransactions(JToken transaction, bool isGetAll = true)
     {
         var trans = new List<TonTransaction>();
-        var transactionHash = transaction["hash"]?.ToString();
+        
         var outMessage = transaction["out_msgs"];
         var isOutgoing = outMessage != null && outMessage.Any();
         var status = transaction["success"]?.ToString();
@@ -160,7 +160,7 @@ public class TonChainService : ITonChainService
 
             // sent
             trans.AddRange(outMessage.Select(c => new TonTransaction{
-                TransactionHash = transactionHash ?? "",
+                TransactionHash = c["hash"]?.ToString() ?? string.Empty,
                 FromAddress = c["source"]?["address"]?.ToString(),
                 ToAddress = c["destination"]?["address"]?.ToString(),
                 TransactionType = transactionType,
@@ -174,7 +174,7 @@ public class TonChainService : ITonChainService
         else
         {
             // received
-
+            var transactionHash = transaction["hash"]?.ToString();
             var amountStr = transaction["in_msg"]?["value"]?.ToString();
 
             trans.Add(new TonTransaction{
