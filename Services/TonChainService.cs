@@ -55,7 +55,7 @@ public class TonChainService : ITonChainService
         
         try
         {
-            var transactions = await GetHistoryTransactionFromOutside(lastBlock);
+            var transactions = await GetHistoryTransactionFromOutside("0");
 
             // Iterate through each transaction and extract the required details
             var index = 0;
