@@ -1,56 +1,58 @@
 ﻿version: '3'
 services:
-  OkCoin:
+  mini-app-test:
     image: okcoinapi
-    container_name: okcoinapi
+    container_name: mini-app-test
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:80
-      MyDatabase__ConnectionString: "mongodb://root:root@mongodb:27017"
-      MyDatabase__DatabaseName: "OkCoinDB"
-      MyDatabase__RedisConnectionString: "redis:6379"
+      MyDatabase__ConnectionString: "mongodb://root:root@mongodb-test:27017"
+      MyDatabase__DatabaseName: "KingdomsDB"
+      MyDatabase__RedisConnectionString: "redis-test:6379"
     ports: 
-      - "8080:80"
+      - "9000:80"
     networks:
-        - okcoin
+        - mini-app-test
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-        - mongodb
-        - redis
+        - mongodb-test
+        - redis-test
 
-  mongodb:
+  mongodb-test:
     image: mongo:latest
+    container_name: mongodb-test
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     volumes:
-      - mongodb_data:/data/db
+      - mongodb_data_test:/data/db
     ports:
-      - "27017:27017"
+      - "27018:27017"
     networks:
-        - okcoin
+        - mini-app-test
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  redis:
+  redis-test:
     image: redis:latest
+    container_name: redis-test
     command: redis-server
     volumes:
-      - redis_data:/data
+      - redis_data_test:/data
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
-        - okcoin
+        - mini-app-test
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
 volumes:
-  mongodb_data:
-  redis_data:
+  mongodb_data_test:
+  redis_data_test:
 networks:
-  okcoin:
+  mini-app-test:
         driver: bridge
