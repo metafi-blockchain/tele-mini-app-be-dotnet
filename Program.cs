@@ -98,6 +98,11 @@ builder.Services.AddScoped<IAirdropTokenService, AirdropTokenService>();
 builder.Services.AddSingleton<IExternalClientService, ExternalClientService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<BackgroundCronJobService>();
+
+builder.Services.Configure<HostOptions>(hostOptions =>
+{
+    hostOptions.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+});
 var app = builder.Build();
 
 
