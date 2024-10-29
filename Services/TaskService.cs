@@ -10,9 +10,9 @@ public interface ITaskService
 {
     ResponseDto<List<MyTaskViewModel>> MyTasks(string userId);
     void CreateTasks();
-    void CreateTaskItem(TaskItem taskItem);
-    void UpdateTaskItem(string id, TaskItem taskItem);
-    void DeleteTaskItem(string id);
+    Task<ResponseDto<bool>> CreateTaskItem(TaskItem taskItem);
+    Task<ResponseDto<bool>> UpdateTaskItem(TaskItem taskItem);
+    Task<ResponseDto<bool>> DeleteTaskItem(string id);
     Task<ResponseDto<string>> CompleteTask(string userId, string? taskId, string? code);
 }
 public class TaskService : ITaskService
@@ -382,19 +382,132 @@ public class TaskService : ITaskService
         }
     }
 
-    public void CreateTaskItem(TaskItem taskItem)
+    public async Task<ResponseDto<bool>> CreateTaskItem(TaskItem taskItem)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (string.IsNullOrEmpty(taskItem.Title))
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "Please input the title",
+                };
+            }    
+
+            if (taskItem.Category == TaskCategory.Social && taskItem.SubCategory == null)
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "Please input the sub-category",
+                };
+            }
+
+            await _taskCollection.InsertOneAsync(taskItem);
+
+            return new ResponseDto<bool>
+            {
+                Success = true,
+                Data = true
+            };
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine($"{nameof(CreateTaskItem)} Error: {ex.Message}");
+            return new ResponseDto<bool> 
+            {
+            };
+        }
     }
 
-    public void UpdateTaskItem(string id, TaskItem taskItem)
+    public async Task<ResponseDto<bool>> UpdateTaskItem(TaskItem taskItem)
     {
-        throw new NotImplementedException();
+        try
+        {
+            if (string.IsNullOrEmpty(taskItem.Title))
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "Please input the title",
+                };
+            }    
+
+            if (taskItem.Category == TaskCategory.Social && taskItem.SubCategory == null)
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "Please input the sub-category",
+                };
+            }
+
+            var task = await _taskCollection.Find(c => c.Id == taskItem.Id).FirstOrDefaultAsync();
+            if (task is null)
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "The task is not found"
+                };
+            }
+
+            task.Title = taskItem.Title;
+            task.Category = taskItem.Category;
+            task.Description = taskItem.Description;
+            task.Reward = taskItem.Reward;
+            task.IsActive = taskItem.IsActive;
+            task.UpdatedAt = DateTime.UtcNow;
+            task.Url = taskItem.Url;
+            task.Code = taskItem.Code;
+            task.ImageUrl = taskItem.ImageUrl;
+            task.SubCategory = taskItem.SubCategory;
+            task.Category = taskItem.Category;
+            task.Value = taskItem.Value;
+            task.Order = taskItem.Order;
+
+            await _taskCollection.ReplaceOneAsync(c => c.Id == task.Id, task);
+
+            return new ResponseDto<bool>
+            {
+                Success = true,
+                Data = true
+            };
+        }
+        catch (System.Exception ex)
+        {
+            
+            Console.WriteLine($"{nameof(UpdateTaskItem)} Error: {ex.Message}");
+            return new ResponseDto<bool> 
+            {
+            };
+        }
     }
 
-    public void DeleteTaskItem(string id)
+    public async Task<ResponseDto<bool>> DeleteTaskItem(string id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var task = await _taskCollection.Find(c => c.Id == id).FirstOrDefaultAsync();
+            if (task is null)
+            {
+                return new ResponseDto<bool>
+                {
+                    Message = "The task is not found"
+                };
+            }
+
+            await _taskCollection.DeleteOneAsync(c => c.Id == id);
+
+            return new ResponseDto<bool>
+            {
+                Success = true,
+                Data = true
+            };
+        }
+        catch (System.Exception ex)
+        {
+            Console.WriteLine($"{nameof(UpdateTaskItem)} Error: {ex.Message}");
+            return new ResponseDto<bool> 
+            {
+            };
+        }
     }
 
     public async Task<ResponseDto<string>> CompleteTask(string userId, string? taskId, string? code)

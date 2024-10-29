@@ -130,5 +130,6 @@ app.MapTapEndpoint();
 app.MapOtherEndpoint();
 app.MapAirdropTokenEndpoint();
 app.MapTonChainEndpoint();
+app.MapTaskEndpoint();
 
 app.Run();

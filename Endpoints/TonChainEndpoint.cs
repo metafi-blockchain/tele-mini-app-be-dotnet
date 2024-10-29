@@ -63,6 +63,14 @@ namespace OkCoin.API.Endpoints
 
                 if (string.IsNullOrEmpty(userId)) return Results.BadRequest("User not found");
 
+                var isAdmin = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.IsAdmin)?.Value.ToLower() == "true";
+                if (!isAdmin)
+                {
+                    var teleId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.TelegramId)?.Value;
+                    var defaultAdminTelegramId = app.Configuration["DefaultAdminTelegramId"];
+                    if (teleId != defaultAdminTelegramId) return Results.BadRequest("You are not admin");
+                }
+
                 await tonChainService.MigrateWalletAddressReceiveForOldUserAsync();
 
                 return Results.Ok("done");
