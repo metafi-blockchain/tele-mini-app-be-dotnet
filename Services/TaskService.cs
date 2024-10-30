@@ -92,8 +92,29 @@ public class TaskService : ITaskService
         
         var twitters = new Dictionary<string, string>()
         {
-            {"https://x.com/cristiano?s=21","Follow Cristiano Ronaldo on X"}
+            {"https://x.com/cristiano?s=21","Follow Cristiano Ronaldo on X"},
+            {"https://x.com/leomessisite?s=21","Follow Lionel Messi on X"},
+            {"https://x.com/kmbappe?s=21","Follow Kylian Mbappé on X"},
+            {"https://x.com/bellinghamjude?s=21","Follow Jude Bellingham on X"},
+            {"https://x.com/b_fernandes8?s=21","Follow Bruno Fernandes on X"},
+            {"https://x.com/realmadrid?s=21","Follow Real Madrid C.F. on X"},
+            {"https://x.com/fcbarcelona?s=21","Follow FC Barcelona on X"},
+            {"https://x.com/manutd?s=21","Follow Manchester United on X"},
+            {"https://x.com/mancity?s=21","Follow Manchester City on X"},
+            {"https://x.com/chelseafc?s=21","Follow Chelsea FC on X"},
+            {"https://x.com/fcbayern?s=21","Follow FC Bayern München on X"},
+            {"https://x.com/bayer04fussball?s=21","Follow Bayer 04 Leverkusen on X"},
+            {"https://x.com/juventusfc?s=21","Follow JuventusFC on X"},
+            {"https://x.com/ton_blockchain?s=21","Follow TON on X"},
+            {"https://x.com/tonkeeper?s=21","Follow Tonkeeper on X"},
+            {"https://x.com/realdogshouse?s=21","Follow Dogs Community on X"},
+            {"https://x.com/coinbase?s=21","Follow Coinbase on X"},
+            {"https://x.com/okx?s=21","Follow OKX on X"},
+            {"https://x.com/vinijr?s=21","Follow Vini Jr. on X"},
+            {"https://x.com/agarnacho7?s=21","Follow Alejandro Garnacho on X"},
+            {"https://x.com/smane_officiel?s=21","Follow Sadio Mané on X"}
         };
+        
         var lst = new List<TaskItem>()
         {
             new TaskItem()
@@ -139,7 +160,7 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Social,
-                Title = "Join External Kingdom",
+                Title = "Join Sports Hero",
                 Description = "Join our Telegram channel",
                 Reward = 50000m,
                 IsActive = true,
@@ -149,6 +170,163 @@ public class TaskService : ITaskService
                 ImageUrl = "https://app.sportshero.club/images/icons/logo.svg",
                 SubCategory = SubCategory.T,
                 Order = 999
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Vertus",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@Vertus_App_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/vertus.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Hamster Kombat",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@hamster_kombat_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/hamster.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Cyber Finance",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@CyberFinanceBot",
+                ImageUrl = "https://app.sportshero.club/images/game/cyber.webp",
+                SubCategory = SubCategory.T
+            },
+
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "OKX Racer",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@OKX_official_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/okx.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Gemz",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@gemzcoin_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/gemz.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Dotcoin",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@dotcoin_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/dotcoin.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "TapSwap",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@tapswap_mirror_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/tapsw-ap.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Rocky Rabbit",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@rocky_rabbit_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/rocky.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Spell Wallet",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@spell_wallet_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/spell.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Toncapy",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "@toncapy_bot",
+                ImageUrl = "https://app.sportshero.club/images/game/tony.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Dragon Crossing",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "https://t.me/DragonCrossing_bot/DragonCrossing?startapp=Mzc1MjQxNzg5",
+                ImageUrl = "https://app.sportshero.club/images/game/dragon.webp",
+                SubCategory = SubCategory.T
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
+                Title = "Binance Moonbix bot",
+                Description = "Play a game",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "https://t.me/Binance_Moonbix_bot/start?startApp=ref_1247878012&startapp=ref_1247878012&utm_medium=web_share_copy",
+                ImageUrl = "https://app.sportshero.club/images/game/moonbix.webp",
+                SubCategory = SubCategory.T
             },
             new TaskItem()
             {
