@@ -55,7 +55,7 @@ public class TonChainService : ITonChainService
         
         try
         {
-            var transactions = await GetHistoryTransactionFromOutside("0");
+            var transactions = await GetHistoryTransactionFromOutside(lastBlock);
 
             // Iterate through each transaction and extract the required details
             var index = 0;
@@ -121,13 +121,13 @@ public class TonChainService : ITonChainService
         }
     }
 
-    public async Task<JToken?> GetHistoryTransactionFromOutside(string? lastBlock)
+    public async Task<JToken?> GetHistoryTransactionFromOutside(string? lastBlock, int limit = 100)
     {
         try
         {
             var baseUrl = _tonChainSettings.IsMainNet ? _endpointsOutSideOption.MainNet : _endpointsOutSideOption.TestNet;
             
-            var apiUrl = $"{baseUrl}/v2/blockchain/accounts/{_tonChainSettings.WalletAddress}/transactions?limit=100&sort_order=desc";
+            var apiUrl = $"{baseUrl}/v2/blockchain/accounts/{_tonChainSettings.WalletAddress}/transactions?limit={limit}&sort_order=desc";
             
             if(!string.IsNullOrEmpty(lastBlock)) apiUrl += "&after_lt=" + lastBlock;
 
@@ -532,7 +532,7 @@ public class TonChainService : ITonChainService
         Console.WriteLine($"{nameof(MigrateWalletAddressReceiveForOldUserAsync)} - Start");
         try
         {
-            var transactions = await GetHistoryTransactionFromOutside("0");
+            var transactions = await GetHistoryTransactionFromOutside("0", 1000);
 
             if (transactions == null)
             {
