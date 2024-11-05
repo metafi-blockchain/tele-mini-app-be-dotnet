@@ -19,7 +19,7 @@ metadata:
   name: okcoin-config
   namespace: minigame
 data:
-  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_ENVIRONMENT: "Development"
   ASPNETCORE_URLS: "http://+:80"
   MyDatabase__DatabaseName: "OkCoinDB"
 
