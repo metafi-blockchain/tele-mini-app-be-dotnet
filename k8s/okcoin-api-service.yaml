@@ -43,7 +43,7 @@ spec:
     spec:
       containers:
         - name: okcoin-api
-          image: metafi/ok-coin-api:0.1.0
+          image: metafi/ok-coin-api:0.1.1
           ports:
             - containerPort: 80
           env:
