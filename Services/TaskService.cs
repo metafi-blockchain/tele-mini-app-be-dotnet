@@ -772,6 +772,10 @@ public class TaskService : ITaskService
         await _myTaskCollection.InsertOneAsync(myTask);
         
         user.Balance += task.Reward;
+        
+        user.TournamentBalance += task.Reward;
+        user.TournamentBalanceUpdatedAt = DateTime.UtcNow;
+
         user.GrandBalance += task.Reward;
         user.BalanceUpdatedAt = DateTime.UtcNow;
         await _userCollection.ReplaceOneAsync(x => x.Id == userId, user);

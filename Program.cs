@@ -96,6 +96,7 @@ builder.Services.AddSingleton<IStatisticService, StatisticService>();
 builder.Services.AddSingleton<ITonChainService, TonChainService>();
 builder.Services.AddScoped<IAirdropTokenService, AirdropTokenService>();
 builder.Services.AddSingleton<IExternalClientService, ExternalClientService>();
+builder.Services.AddSingleton<IDashboardService, DashboardService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<BackgroundCronJobService>();
 
@@ -131,5 +132,6 @@ app.MapOtherEndpoint();
 app.MapAirdropTokenEndpoint();
 app.MapTonChainEndpoint();
 app.MapTaskEndpoint();
+app.MapDashboardEndpoint();
 
 app.Run();

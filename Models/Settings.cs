@@ -48,6 +48,7 @@ public class CronJobSettings
     public bool SyncTonTransaction { get; set; } = true;
     public bool AIBotRewardDistribution { get; set; } = true;
     public bool InGameTransaction { get; set; } = true;
+    public bool SyncTournamentRanking { get; set; } = true;
 }
 
 public class TelegramSettings

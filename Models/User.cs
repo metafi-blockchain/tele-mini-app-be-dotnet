@@ -38,6 +38,10 @@ public class User
     public DateTime BalanceUpdatedAt { get; set; } = DateTime.UtcNow;
     [BsonElement("tap_balance")]
     public decimal TapBalance { get; set; } = 0;
+    [BsonElement("tournament_balance")]
+    public decimal TournamentBalance { get; set; } = 0;
+    [BsonElement("tournament_updated_at")]
+    public DateTime TournamentBalanceUpdatedAt { get; set; } = DateTime.UtcNow;
     [BsonElement("tap_balance_updated_at")]
     public DateTime TapBalanceUpdatedAt { get; set; } = DateTime.UtcNow;
     [BsonElement("available_energy")]

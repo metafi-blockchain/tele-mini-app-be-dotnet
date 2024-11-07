@@ -346,6 +346,10 @@ public class TappingService : ITappingService
             user.Balance += earnedPoint;
             user.GrandBalance += earnedPoint;
             user.TapBalance += earnedPoint;
+            
+            user.TournamentBalance += earnedPoint;
+            user.TournamentBalanceUpdatedAt = DateTime.UtcNow;
+
             user.TapBalanceUpdatedAt = DateTime.UtcNow;
             user.LastTapped = DateTime.UtcNow;
             user.AvailableTapCount = (int)totalAvailableTap;
@@ -411,6 +415,10 @@ public class TappingService : ITappingService
 
             user.AvailableTapCount = (int)(totalAvailableTap - tappedValue);
             user.Balance += tappedValue;
+            
+            user.TournamentBalance += tappedValue;
+            user.TournamentBalanceUpdatedAt = DateTime.UtcNow;
+
             user.GrandBalance += tappedValue;
             user.LastTapped = DateTime.UtcNow;
             user.TapBalance += tappedValue;
@@ -565,6 +573,10 @@ public class TappingService : ITappingService
 
                 user.Balance += reward;
                 user.GrandBalance += reward;
+                
+                user.TournamentBalance += reward;
+                user.TournamentBalanceUpdatedAt = DateTime.UtcNow;
+
                 user.BalanceUpdatedAt = DateTime.UtcNow;
                 await _userCollection.ReplaceOneAsync(x => x.Id == user.Id, user);
                 await _statisticService.UpdateTotalSharedBalance(reward);

@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using OkCoin.API.Models;
+using OkCoin.API.Services.Interfaces;
 using StackExchange.Redis;
 using static System.Console;
 
@@ -11,15 +12,17 @@ public class BackgroundCronJobService : BackgroundService
 {
     private readonly ITonChainService _tonChainService;
     private readonly ITappingService _tappingService;
+    private readonly IDashboardService _dashboardService;
     private readonly IDatabase _db;
     private readonly IMongoCollection<InGameTransaction> _inGameTransactionCollection;
     private readonly CronJobSettings _cronJobSettings;
     
     
-    public BackgroundCronJobService(ITonChainService tonChainService, ITappingService tappingService, IOptions<DbSettings> myDatabaseSettings, IOptions<CronJobSettings> cronJobSettings)
+    public BackgroundCronJobService(ITonChainService tonChainService, ITappingService tappingService, IOptions<DbSettings> myDatabaseSettings, IOptions<CronJobSettings> cronJobSettings, IDashboardService dashboardService)
     {
         _tonChainService = tonChainService;
         _tappingService = tappingService;
+        _dashboardService = dashboardService;
         var redis = ConnectionMultiplexer.Connect(myDatabaseSettings.Value.RedisConnectionString);
         _db = redis.GetDatabase();
         var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
@@ -34,7 +37,8 @@ public class BackgroundCronJobService : BackgroundService
         var job1 = GetTransactionsAsync(stoppingToken);
         var job2 = DistributeReward(stoppingToken);
         var job3 = ProcessInGameTransactionAsync(stoppingToken);
-        await Task.WhenAll(job1, job2, job3);
+        var job4 = ProcessSyncTournamentRanking(stoppingToken);
+        await Task.WhenAll(job1, job2, job3, job4);
     }
     
     private async Task GetTransactionsAsync(CancellationToken stoppingToken)
@@ -107,5 +111,16 @@ public class BackgroundCronJobService : BackgroundService
         }
 
         Console.WriteLine("All records processed.");
+    }
+
+    private async Task ProcessSyncTournamentRanking(CancellationToken stoppingToken)
+    {
+        if(!_cronJobSettings.SyncTournamentRanking) return;
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await _dashboardService.SyncTournamentRankingAsync();
+            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+        }
     }
 }

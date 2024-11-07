@@ -27,4 +27,9 @@ public static class Constants
         public const double TonRewardForReferralLevel1 = 0.1;
         public const double TonRewardForReferralLevel2 = 0.05;
     }
+
+    public static class RedisKeyConstants
+    {
+        public const  string TOURNAMENT_RANKING = "TournamentRanking";
+    }
 }
