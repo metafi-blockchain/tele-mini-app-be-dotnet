@@ -76,6 +76,12 @@ public class User
     public long AmountToken { get; set; } = 0;
     [BsonElement("receive_address")]
     public string ReceiveAddress { get; set; } = string.Empty;
+    
+    [BsonElement("is_receive_tournament_reward")]
+    public bool IsReceiveTournamentReward { get; set; }
+
+    [BsonElement("total_tournament_reward")]
+    public long TotalTournamentReward { get; set; }
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
@@ -101,6 +107,8 @@ public class User
         IsReceiveAirdrop = IsReceiveAirdrop,
         AmountToken = AmountToken,
         ReceiveAddress = ReceiveAddress,
-        IsAdmin = IsAdmin
+        IsAdmin = IsAdmin,
+        IsReceiveTournamentReward = IsReceiveTournamentReward,
+        TotalTournamentReward = TotalTournamentReward
     };
 }

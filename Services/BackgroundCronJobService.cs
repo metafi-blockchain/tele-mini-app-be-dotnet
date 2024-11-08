@@ -38,7 +38,8 @@ public class BackgroundCronJobService : BackgroundService
         var job2 = DistributeReward(stoppingToken);
         var job3 = ProcessInGameTransactionAsync(stoppingToken);
         var job4 = ProcessSyncTournamentRanking(stoppingToken);
-        await Task.WhenAll(job1, job2, job3, job4);
+        var job5 = ProcessUpdateTotalTournament(stoppingToken);
+        await Task.WhenAll(job1, job2, job3, job4, job5);
     }
     
     private async Task GetTransactionsAsync(CancellationToken stoppingToken)
@@ -121,6 +122,29 @@ public class BackgroundCronJobService : BackgroundService
         {
             await _dashboardService.SyncTournamentRankingAsync();
             await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+        }
+    }
+
+    private async Task ProcessUpdateTotalTournament(CancellationToken stoppingToken)
+    {
+        if (!_cronJobSettings.SyncTournamentRanking)
+        {
+            return;
+        }
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var now = DateTime.UtcNow;
+            var nextRunTime = now.Date.AddDays(1); // Calculate next 12:00 AM
+            var delay = nextRunTime - now;
+            await Task.Delay(delay, stoppingToken);
+
+            // 2 months run once,
+            if (nextRunTime.Month % 2 == 0 && nextRunTime.Day == 1) 
+            {
+                await _dashboardService.UpdateTotalTournamentRewardAsync();
+            }
+            await Task.Delay(TimeSpan.FromHours(23), stoppingToken);
         }
     }
 }

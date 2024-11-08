@@ -34,6 +34,8 @@ public class UserViewModel
     public bool IsReceiveAirdrop { get; set; }
     public long AmountToken { get; set; } = 0;
     public string ReceiveAddress { get; set; } = string.Empty;
+    public bool IsReceiveTournamentReward { get; set; }
+    public long TotalTournamentReward { get; set; }
 }
 
 public class MeResponse
