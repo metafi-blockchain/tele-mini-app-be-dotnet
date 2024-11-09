@@ -94,7 +94,9 @@ public class DashboardService : IDashboardService
 
             await _userCollection.UpdateManyAsync(_ => true, 
                                         Builders<User>.Update.Set(p => p.IsReceiveTournamentReward, false)
-                                                                    .Set(p => p.TotalTournamentReward, 0));
+                                                                    .Set(p => p.TotalTournamentReward, 0)
+                                                                    .Set(u => u.TournamentBalance, 0)
+                                                                    .Set(u => u.TournamentBalanceUpdatedAt, DateTime.UtcNow));
 
 
             var UpdateTotalTournamentRewardAsyncForTop = users.Select((item, index) => {
