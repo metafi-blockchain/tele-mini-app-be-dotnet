@@ -36,6 +36,7 @@ public class UserViewModel
     public string ReceiveAddress { get; set; } = string.Empty;
     public bool IsReceiveTournamentReward { get; set; }
     public long TotalTournamentReward { get; set; }
+    public decimal TournamentBalance { get; set; } = 0;
 }
 
 public class MeResponse

@@ -109,6 +109,7 @@ public class User
         ReceiveAddress = ReceiveAddress,
         IsAdmin = IsAdmin,
         IsReceiveTournamentReward = IsReceiveTournamentReward,
-        TotalTournamentReward = TotalTournamentReward
+        TotalTournamentReward = TotalTournamentReward,
+        TournamentBalance = TournamentBalance
     };
 }
