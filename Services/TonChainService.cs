@@ -567,6 +567,7 @@ public class TonChainService : ITonChainService
                     await _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
 
                     Console.WriteLine($"telegramId: {user.TelegramId}, ReceiveAddress: {user.ReceiveAddress}");
+                    await Task.Delay(TimeSpan.FromSeconds(3));
                 }
             }
         }
