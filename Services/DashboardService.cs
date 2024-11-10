@@ -110,6 +110,8 @@ public class DashboardService : IDashboardService
 
             await _userCollection.BulkWriteAsync(UpdateTotalTournamentRewardAsyncForTop);
 
+            _ = _redisCacheService.Delete(RedisKeyConstants.TOURNAMENT_RANKING);
+
             _logger.LogInformation($"{nameof(UpdateTotalTournamentRewardAsync)} - End.");
         }
         catch (System.Exception ex)
@@ -135,6 +137,15 @@ public class DashboardService : IDashboardService
                 };
             } 
 
+            if (user.TotalTournamentReward == 0)
+            {
+                return new ResponseDto<bool>
+                {
+                    Success = false,
+                    Message = "You don't have any reward."
+                };
+            }
+            
             if (user.IsReceiveTournamentReward) 
             {
                 return new ResponseDto<bool>
@@ -145,6 +156,7 @@ public class DashboardService : IDashboardService
             }
 
             user.IsReceiveTournamentReward = true;
+            user.TotalTournamentReward = 0;
 
             await _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
 

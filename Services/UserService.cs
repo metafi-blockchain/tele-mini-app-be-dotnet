@@ -101,7 +101,7 @@ public class UserService : IUserService
             Message = "User is found",
             Success = true
         };
-        var levels = res.Data.MyTasks.Where(x=>x.Category == TaskCategory.Ranking).ToList();
+        var levels = res.Data.MyTasks.Where(x=>x.Category == TaskCategory.Farming).ToList();
         var rank = levels.OrderByDescending(x=>x.TaskValue).FirstOrDefault(x=>x.IsCompleted)?.Title ?? "Bronze";
         res.Data.User.UserRank = rank;
         return res;

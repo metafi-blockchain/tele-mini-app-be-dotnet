@@ -39,7 +39,7 @@ public enum TaskCategory
 {
     Video,
     Social,
-    Ranking,
+    Farming,
     Referral,
 }
 
@@ -47,5 +47,7 @@ public enum SubCategory
 {
     X,
     Y,
-    T
+    T,
+    D,
+    F
 }

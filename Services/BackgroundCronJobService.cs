@@ -121,7 +121,7 @@ public class BackgroundCronJobService : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             await _dashboardService.SyncTournamentRankingAsync();
-            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
         }
     }
 
@@ -134,17 +134,20 @@ public class BackgroundCronJobService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.UtcNow;
-            var nextRunTime = now.Date.AddDays(1); // Calculate next 12:00 AM
-            var delay = nextRunTime - now;
-            await Task.Delay(delay, stoppingToken);
+            // var now = DateTime.UtcNow;
+            // var nextRunTime = now.Date.AddDays(1); // Calculate next 12:00 AM
+            // var delay = nextRunTime - now;
+            // await Task.Delay(delay, stoppingToken);
 
-            // 2 months run once,
-            if (nextRunTime.Month % 2 == 0 && nextRunTime.Day == 1) 
-            {
-                await _dashboardService.UpdateTotalTournamentRewardAsync();
-            }
-            await Task.Delay(TimeSpan.FromHours(23), stoppingToken);
+            // // 2 months run once,
+            // if (nextRunTime.Month % 2 == 0 && nextRunTime.Day == 1) 
+            // {
+            //     await _dashboardService.UpdateTotalTournamentRewardAsync();
+            // }
+            // await Task.Delay(TimeSpan.FromHours(23), stoppingToken);
+
+            await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
+            await _dashboardService.UpdateTotalTournamentRewardAsync();
         }
     }
 }
