@@ -20,7 +20,7 @@ public interface ITonChainService
     Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawByUserIdAsync(string userId, ListWithdrawRequestViewModel request);
     Task<ResponseDto<IEnumerable<WithdrawResponseModel>>> GetListWithdrawAsync(ListWithdrawRequestViewModel request);
 
-    Task MigrateWalletAddressReceiveForOldUserAsync();
+    Task MigrateWalletAddressReceiveForOldUserAsync(string lastBlock = "0", int limit = 1000);
 }
 
 public class TonChainService : ITonChainService
@@ -527,12 +527,12 @@ public class TonChainService : ITonChainService
         };
     }
 
-    public async Task MigrateWalletAddressReceiveForOldUserAsync()
+    public async Task MigrateWalletAddressReceiveForOldUserAsync(string lastBlock = "0", int limit = 1000)
     {
         Console.WriteLine($"{nameof(MigrateWalletAddressReceiveForOldUserAsync)} - Start");
         try
         {
-            var transactions = await GetHistoryTransactionFromOutside("0", 1000);
+            var transactions = await GetHistoryTransactionFromOutside(lastBlock, limit);
 
             if (transactions == null)
             {

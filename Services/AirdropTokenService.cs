@@ -118,7 +118,7 @@ namespace OkCoin.API.Services
                 };
             }
 
-            var totalYear = currentYear - yearJoinTelegram;
+            var totalYear = (currentYear - yearJoinTelegram) + 1;
             var airdrop = totalYear * _airdropTokenDocuments.AirdropToken;
 
             return new AirdropTokenResponseModel
