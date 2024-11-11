@@ -26,5 +26,8 @@ public static class Constants
         public const long TonInNano = 1_000_000_000;
         public const double TonRewardForReferralLevel1 = 0.1;
         public const double TonRewardForReferralLevel2 = 0.05;
+        public const int MaxImageSoccerPlayer = 10;
+        public const int MaxPuzzlePiecePerImageSoccerPlayer = 9;
+        public const int DonateRemainingSpinEveryday = 5;
     }
 }

@@ -29,11 +29,12 @@ public class UserViewModel
     public bool IsAdmin { get; set; } = false;
     public bool HaveTapBot { get; set; } = false;    
     public bool HavePremiumBot { get; set; } = false;
-    
     public long TonBalance { get; set; } = 0;
     public bool IsReceiveAirdrop { get; set; }
     public long AmountToken { get; set; } = 0;
     public string ReceiveAddress { get; set; } = string.Empty;
+    public string PuzzlePieceOfImage { get; set; } = string.Empty;
+    public int RemainingSpin { get; set; }
 }
 
 public class MeResponse

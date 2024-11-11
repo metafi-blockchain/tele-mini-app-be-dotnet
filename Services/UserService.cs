@@ -197,6 +197,7 @@ public class UserService : IUserService
                     if(refererUser != null)
                     {
                         refererUser.RefererCount++;
+                        refererUser.RemainingSpin += 5;
                         await UpdateAsync(refererUser.Id ?? string.Empty, refererUser);
                     }
                 }
