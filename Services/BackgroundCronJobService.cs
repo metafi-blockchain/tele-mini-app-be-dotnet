@@ -11,15 +11,17 @@ public class BackgroundCronJobService : BackgroundService
 {
     private readonly ITonChainService _tonChainService;
     private readonly ITappingService _tappingService;
+    private readonly ILuckySpinService _luckySpinService;
     private readonly IDatabase _db;
     private readonly IMongoCollection<InGameTransaction> _inGameTransactionCollection;
     private readonly CronJobSettings _cronJobSettings;
     
     
-    public BackgroundCronJobService(ITonChainService tonChainService, ITappingService tappingService, IOptions<DbSettings> myDatabaseSettings, IOptions<CronJobSettings> cronJobSettings)
+    public BackgroundCronJobService(ITonChainService tonChainService, ITappingService tappingService, IOptions<DbSettings> myDatabaseSettings, IOptions<CronJobSettings> cronJobSettings, ILuckySpinService luckySpinService)
     {
         _tonChainService = tonChainService;
         _tappingService = tappingService;
+        _luckySpinService = luckySpinService;
         var redis = ConnectionMultiplexer.Connect(myDatabaseSettings.Value.RedisConnectionString);
         _db = redis.GetDatabase();
         var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
@@ -34,9 +36,10 @@ public class BackgroundCronJobService : BackgroundService
         var job1 = GetTransactionsAsync(stoppingToken);
         var job2 = DistributeReward(stoppingToken);
         var job3 = ProcessInGameTransactionAsync(stoppingToken);
-        await Task.WhenAll(job1, job2, job3);
+        var job4 = UpdateRemainingSpinAsync(stoppingToken);
+        await Task.WhenAll(job1, job2, job3, job4);
     }
-    
+
     private async Task GetTransactionsAsync(CancellationToken stoppingToken)
     {
         if(!_cronJobSettings.SyncTonTransaction) return;
@@ -107,5 +110,18 @@ public class BackgroundCronJobService : BackgroundService
         }
 
         Console.WriteLine("All records processed.");
+    }
+
+    private async Task UpdateRemainingSpinAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            var now = DateTime.UtcNow;
+            var nextRunTime = now.Date.AddDays(1); // Calculate next 12:00 AM
+            var delay = nextRunTime - now;
+            await Task.Delay(delay, stoppingToken);
+            await _luckySpinService.UpdateRemainingSpinEverydayAsync();
+            await Task.Delay(TimeSpan.FromHours(23), stoppingToken);
+        }
     }
 }

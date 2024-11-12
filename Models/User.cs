@@ -72,6 +72,12 @@ public class User
     public long AmountToken { get; set; } = 0;
     [BsonElement("receive_address")]
     public string ReceiveAddress { get; set; } = string.Empty;
+    [BsonElement("puzzle_piece_of_image")]
+    public string PuzzlePieceOfImage { get; set; } = string.Empty;
+
+    [BsonElement("remaining_spin")]
+    public int RemainingSpin { get; set; }
+
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
@@ -97,6 +103,8 @@ public class User
         IsReceiveAirdrop = IsReceiveAirdrop,
         AmountToken = AmountToken,
         ReceiveAddress = ReceiveAddress,
-        IsAdmin = IsAdmin
+        IsAdmin = IsAdmin,
+        PuzzlePieceOfImage = PuzzlePieceOfImage,
+        RemainingSpin = RemainingSpin
     };
 }
