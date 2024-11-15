@@ -84,7 +84,7 @@ public class LuckySpinService : ILuckySpinService
         } 
     }
 
-    public async Task UpdateRemainingSpinEverydayAsync()
+    public async Task<string> UpdateRemainingSpinEverydayAsync()
     {
         try
         {
@@ -96,25 +96,13 @@ public class LuckySpinService : ILuckySpinService
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}");
             
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - End.");
+
+            return $"MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}";
         }
         catch (System.Exception ex)
         {
             _logger.LogError($"{nameof(UpdateRemainingSpinEverydayAsync)} - Error: {ex.Message}");
-        }
-    }
-
-    public async Task<List<User>> GetAllUsers()
-    {
-        try
-        {
-            var users = await _userCollection.Find(_ => true).ToListAsync();
-
-            return users;
-        }
-        catch (System.Exception ex)
-        {
-            _logger.LogError($"{nameof(GetAllUsers)} - Error: {ex.Message}");
-            return null;
+            return "Error";
         }
     }
 }

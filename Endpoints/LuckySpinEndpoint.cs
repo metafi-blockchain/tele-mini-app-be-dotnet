@@ -35,10 +35,9 @@ public static class LuckySpinEndpoint
                 if (teleId != defaultAdminTelegramId) return Results.BadRequest("You are not admin");
             }
 
-            await luckyDrawService.UpdateRemainingSpinEverydayAsync();
+            var response = await luckyDrawService.UpdateRemainingSpinEverydayAsync();
 
-            var users = await luckyDrawService.GetAllUsers();
-            return Results.Ok(users);
+            return Results.Ok(response);
         }).RequireAuthorization().WithName("UpdateRemainingSpinEveryday").WithOpenApi();
     }
 }
