@@ -90,14 +90,31 @@ public class LuckySpinService : ILuckySpinService
         {
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - Begin.");
 
-            await _userCollection.UpdateManyAsync(_ => true, 
+            var result = await _userCollection.UpdateManyAsync(_ => true, 
                                         Builders<User>.Update.Set(p => p.RemainingSpin, Constants.GameSettings.DonateRemainingSpinEveryday));
 
+            _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}");
+            
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - End.");
         }
         catch (System.Exception ex)
         {
             _logger.LogError($"{nameof(UpdateRemainingSpinEverydayAsync)} - Error: {ex.Message}");
+        }
+    }
+
+    public async Task<List<User>> GetAllUsers()
+    {
+        try
+        {
+            var users = await _userCollection.Find(_ => true).ToListAsync();
+
+            return users;
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError($"{nameof(GetAllUsers)} - Error: {ex.Message}");
+            return null;
         }
     }
 }

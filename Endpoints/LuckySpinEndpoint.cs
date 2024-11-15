@@ -20,5 +20,25 @@ public static class LuckySpinEndpoint
 
             return Results.Ok(response);
         }).RequireAuthorization().WithName("PuzzlePieceOfImage").WithOpenApi();
+
+        app.MapGet("/update-remaining-spin-everyday", async ([FromServices] ILuckySpinService luckyDrawService, ClaimsPrincipal userClaimsPrincipal) =>
+        {
+            var id = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.UserId)?.Value;
+
+            if (string.IsNullOrEmpty(id)) return Results.BadRequest("User not found");
+
+            var isAdmin = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.IsAdmin)?.Value.ToLower() == "true";
+            if (!isAdmin)
+            {
+                var teleId = userClaimsPrincipal.FindFirst(Constants.CustomClaimTypes.TelegramId)?.Value;
+                var defaultAdminTelegramId = app.Configuration["DefaultAdminTelegramId"];
+                if (teleId != defaultAdminTelegramId) return Results.BadRequest("You are not admin");
+            }
+
+            await luckyDrawService.UpdateRemainingSpinEverydayAsync();
+
+            var users = await luckyDrawService.GetAllUsers();
+            return Results.Ok(users);
+        }).RequireAuthorization().WithName("UpdateRemainingSpinEveryday").WithOpenApi();
     }
 }
