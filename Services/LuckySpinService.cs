@@ -91,18 +91,35 @@ public class LuckySpinService : ILuckySpinService
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - Begin.");
 
             var result = await _userCollection.UpdateManyAsync(_ => true, 
-                                        Builders<User>.Update.Set(p => p.RemainingSpin, Constants.GameSettings.DonateRemainingSpinEveryday));
+                                        Builders<User>.Update.Set(p => p.RemainingSpin, Constants.GameSettings.DonateRemainingSpinEveryday)
+                                                                    .Set(p => p.DonateRemainingSpinAt, DateTime.UtcNow));
 
             _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}");
             
-            _logger.LogInformation($"{nameof(UpdateRemainingSpinEverydayAsync)} - End.");
-
             return $"MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}";
         }
         catch (System.Exception ex)
         {
             _logger.LogError($"{nameof(UpdateRemainingSpinEverydayAsync)} - Error: {ex.Message}");
             return "Error";
+        }
+    }
+
+    public async Task ReUpdateRemainingSpinEverydayAsync()
+    {
+        try
+        {
+            _logger.LogInformation($"{nameof(ReUpdateRemainingSpinEverydayAsync)} - Begin.");
+
+            var result = await _userCollection.UpdateManyAsync(c => c.DonateRemainingSpinAt.Date != DateTime.UtcNow.Date, 
+                                        Builders<User>.Update.Set(p => p.RemainingSpin, Constants.GameSettings.DonateRemainingSpinEveryday)
+                                                                    .Set(p => p.DonateRemainingSpinAt, DateTime.UtcNow));
+
+            _logger.LogInformation($"{nameof(ReUpdateRemainingSpinEverydayAsync)} - MatchedCount = {result.MatchedCount}, ModifiedCount = {result.ModifiedCount}");
+        }
+        catch (System.Exception ex)
+        {
+            _logger.LogError($"{nameof(UpdateRemainingSpinEverydayAsync)} - Error: {ex.Message}");
         }
     }
 }

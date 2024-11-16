@@ -9,4 +9,6 @@ public interface ILuckySpinService
     Task<ResponseDto<LuckySpinResponseModel>> GetPuzzlePieceOfImageAsync(string userId);
 
     Task<string> UpdateRemainingSpinEverydayAsync();
+
+    Task ReUpdateRemainingSpinEverydayAsync();
 }

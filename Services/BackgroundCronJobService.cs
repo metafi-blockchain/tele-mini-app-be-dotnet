@@ -119,8 +119,13 @@ public class BackgroundCronJobService : BackgroundService
             var now = DateTime.UtcNow;
             var nextRunTime = now.Date.AddDays(1); // Calculate next 12:00 AM
             var delay = nextRunTime - now;
+            
             await Task.Delay(delay, stoppingToken);
             await _luckySpinService.UpdateRemainingSpinEverydayAsync();
+
+            await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
+            await _luckySpinService.ReUpdateRemainingSpinEverydayAsync();
+
             await Task.Delay(TimeSpan.FromHours(23), stoppingToken);
         }
     }

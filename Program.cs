@@ -10,6 +10,13 @@ using OkCoin.API.Services.Interfaces;
 using OkCoin.API.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole(options =>
+        {
+            options.IncludeScopes = false;
+            options.SingleLine = true;
+            options.TimestampFormat = "yyyy-MM-dd HH:mm:ss ";
+        });
 
 builder.Services.AddCors(options =>
 {

@@ -78,6 +78,9 @@ public class User
     [BsonElement("remaining_spin")]
     public int RemainingSpin { get; set; }
 
+    [BsonElement("donate_remaining_spin_at")]
+    public DateTime DonateRemainingSpinAt { get; set; }
+
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {
