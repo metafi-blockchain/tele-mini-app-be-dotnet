@@ -81,6 +81,9 @@ public class User
     [BsonElement("donate_remaining_spin_at")]
     public DateTime DonateRemainingSpinAt { get; set; }
 
+    [BsonElement("total_spin_performed")]
+    public int TotalSpinPerformed { get; set; }
+
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {

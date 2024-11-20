@@ -29,5 +29,6 @@ public static class Constants
         public const int MaxImageSoccerPlayer = 10;
         public const int MaxPuzzlePiecePerImageSoccerPlayer = 9;
         public const int DonateRemainingSpinEveryday = 5;
+        public const int TotalSpinRequired = 2000;
     }
 }

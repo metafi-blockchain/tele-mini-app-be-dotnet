@@ -55,14 +55,22 @@ public class LuckySpinService : ILuckySpinService
             var puzzlePieceOfImageArray = string.IsNullOrEmpty(user.PuzzlePieceOfImage)
                                                 ? new List<int>()
                                                 : user.PuzzlePieceOfImage.Split(",").Select(int.Parse).ToList();
-
+            
             if(!puzzlePieceOfImageArray.Any(number => number == randomNumber)) 
             {
-                puzzlePieceOfImageArray.Add(randomNumber);
-                user.PuzzlePieceOfImage = string.Join(",", puzzlePieceOfImageArray);
+                if (user.TotalSpinPerformed >= Constants.GameSettings.TotalSpinRequired 
+                    || !IsEnoughPuzzlePieceForOneImage(randomNumber, puzzlePieceOfImageArray))
+                {
+                    puzzlePieceOfImageArray.Add(randomNumber);
+                    user.PuzzlePieceOfImage = string.Join(",", puzzlePieceOfImageArray);
+                }else
+                {
+                    randomNumber = puzzlePieceOfImageArray.First();
+                }
             }
 
             user.RemainingSpin--;
+            user.TotalSpinPerformed++;
 
             _ = _userCollection.ReplaceOneAsync(c => c.Id == user.Id, user);
 
@@ -82,6 +90,17 @@ public class LuckySpinService : ILuckySpinService
             _logger.LogError($"{nameof(GetPuzzlePieceOfImageAsync)} - Error: {ex.Message}");
             return new ResponseDto<LuckySpinResponseModel>();
         } 
+    }
+
+    private bool IsEnoughPuzzlePieceForOneImage(int randomNumber, List<int> puzzlePieceOfImageArray)
+    {
+        var rangeIndex = randomNumber / Constants.GameSettings.MaxPuzzlePiecePerImageSoccerPlayer; // Integer division
+        var rangeStart = rangeIndex * Constants.GameSettings.MaxPuzzlePiecePerImageSoccerPlayer;
+        var rangeEnd = rangeStart + (Constants.GameSettings.MaxPuzzlePiecePerImageSoccerPlayer - 1);
+
+        var totalNumber = puzzlePieceOfImageArray.Count(number => number >= rangeStart && number <= rangeEnd);
+
+        return totalNumber == Constants.GameSettings.MaxPuzzlePiecePerImageSoccerPlayer - 1;
     }
 
     public async Task<string> UpdateRemainingSpinEverydayAsync()
