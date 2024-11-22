@@ -325,7 +325,7 @@ public class TappingService : ITappingService
                 };
             }
 
-            var totalSecond = (long)(DateTime.UtcNow - user.LastTapped.AddMinutes(20)).TotalSeconds;
+            var totalSecond = (long)(DateTime.UtcNow - user.LastTapped.AddMinutes(10)).TotalSeconds;
             if (totalSecond <= 0)
                 return new ResponseDto<long>()
                 {
@@ -333,8 +333,10 @@ public class TappingService : ITappingService
                     Success = true,
                     Data = 0
                 };
-            var earnedPoint = (decimal)totalSecond * 4;
-            if (earnedPoint > 172800) earnedPoint = 172800;
+
+            // max 3 hours => off: 66.66% = 2/3 => 3 x 2/3 ~ 7200s
+            var earnedPoint = Math.Round(totalSecond * 2m/3);
+            if (earnedPoint > 7200) earnedPoint = 7200;
             
             var totalSecondToCalculateAvailableTap = (long)(DateTime.UtcNow - user.LastTapped).TotalSeconds;
             totalSecondToCalculateAvailableTap = totalSecondToCalculateAvailableTap < 0 ? 0 : totalSecondToCalculateAvailableTap;

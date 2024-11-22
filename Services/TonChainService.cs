@@ -321,34 +321,7 @@ public class TonChainService : ITonChainService
                 Currency = "TON",
                 Description = $"Referral reward level 1 from {user.TelegramId} - {user.TelegramUsername}"
             });
-
-            if (!string.IsNullOrEmpty(referrer.RefererId))
-            {
-                var referrer2 = await _userCollection.Find(x => x.TelegramId == referrer.RefererId).FirstOrDefaultAsync();
-
-                if (referrer2 != null)
-                {
-                    const long ref2Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel2 * Constants.GameSettings.TonInNano);
-
-                    referrer2.TonBalance += ref2Amount;
-
-                    referrer2.UpdatedAt = DateTime.UtcNow;
-
-                    await _userCollection.ReplaceOneAsync(x => x.Id == referrer2.Id, referrer2);
-                    
-                    await _statisticService.LogInGameTransactionAsync(new InGameTransaction()
-                    {
-                        Amount = ref2Amount,
-                        Status = "Success",
-                        UserId = referrer.Id,
-                        TransactionType = InGameTransactionType.ReferralReward.ToString(),
-                        Currency = "TON",
-                        Description = $"Referral reward level 2 from {referrer.TelegramId} - {referrer.TelegramUsername}"
-                    });
-                }
-            }
         }
-                                        
     }
     
     public async Task<ResponseDto<bool>> WithdrawAsync(WithdrawRequestViewModel requestViewModel, string userId)

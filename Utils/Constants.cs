@@ -20,7 +20,7 @@ public static class Constants
         public const int AllowedFullEnergyRefill = 3;
         public const string AllowedInfinityTapRedisKey = "{0}-ait";
         public const string AllowedFullEnergyRefillRedisKey = "{0}-afer";
-        public const long DailyPremiumBotReward = 1000000;
+        public const long DailyPremiumBotReward = 28800;
         public const long PremiumBotPriceInNanoTon = 1_000_000_000;
         public const long MinimumWithdrawAmountInNanoTon = 1_000_000_000;
         public const long TonInNano = 1_000_000_000;
