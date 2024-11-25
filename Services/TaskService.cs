@@ -626,6 +626,435 @@ public class TaskService : ITaskService
             },
         };
         
+        // task friends
+        lst.AddRange(
+            new List<TaskItem>(){
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 1 friend",
+                    Description = "Invite 1 friend and earn rewards",
+                    Reward = 10000m,
+                    IsActive = true,
+                    Value = 1,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 5 friends",
+                    Description = "Invite 5 friends and earn rewards",
+                    Reward = 50000m,
+                    IsActive = true,
+                    Value = 5,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 10 friends",
+                    Description = "Invite 10 friends and earn rewards",
+                    Reward = 100000m,
+                    IsActive = true,
+                    Value = 10,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 20 friends",
+                    Description = "Invite 20 friends and earn rewards",
+                    Reward = 200000m,
+                    IsActive = true,
+                    Value = 20,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 50 friends",
+                    Description = "Invite 50 friends and earn rewards",
+                    Reward = 500000m,
+                    IsActive = true,
+                    Value = 50,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 100 friends",
+                    Description = "Invite 100 friends and earn rewards",
+                    Reward = 1000000m,
+                    IsActive = true,
+                    Value = 100,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 200 friends",
+                    Description = "Invite 200 friends and earn rewards",
+                    Reward = 2000000m,
+                    IsActive = true,
+                    Value = 200,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 500 friends",
+                    Description = "Invite 500 friends and earn rewards",
+                    Reward = 5000000m,
+                    IsActive = true,
+                    Value = 500,
+                },
+                new TaskItem()
+                {
+                    Category = TaskCategory.Referral,
+                    Title = "Invite 1000 friends",
+                    Description = "Invite 1000 friends and earn rewards",
+                    Reward = 10000000m,
+                    IsActive = true,
+                    Value = 1000,
+                },
+            }
+        );
+
+        // farming
+        lst.AddRange(new List<TaskItem>{
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Farm: 1,000 Points",
+                Description = "Farm: 1,000 Points and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow, 
+                Value = 1000,
+                SubCategory = SubCategory.Farm
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Farm: 5,000 Points",
+                Description = "Farm: 5,000 Points and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow, 
+                Value = 5000,
+                SubCategory = SubCategory.Farm
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Farm: 10,000 Points",
+                Description = "Farm: 10,000 Points and earn rewards",
+                Reward = 2000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow, 
+                Value = 10000,
+                SubCategory = SubCategory.Farm
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Farm: 20,000 Points",
+                Description = "Farm: 20,000 Points and earn rewards",
+                Reward = 2000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow, 
+                Value = 20000,
+                SubCategory = SubCategory.Farm
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Farm: 50,000 Points",
+                Description = "Farm: 50,000 Points and earn rewards",
+                Reward = 5000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 50000,
+                SubCategory = SubCategory.Farm 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Login continuously for 3 days",
+                Description = "Login continuously for 3 days and earn rewards",
+                Reward = 500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 3,
+                SubCategory = SubCategory.Diligence 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Login continuously for 5 days",
+                Description = "Login continuously for 5 days and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 5,
+                SubCategory = SubCategory.Diligence 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Login continuously for 7 days",
+                Description = "Login continuously for 7 days and earn rewards",
+                Reward = 3000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 7,
+                SubCategory = SubCategory.Diligence 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Login continuously for 14 days",
+                Description = "Login continuously for 14 days and earn rewards",
+                Reward = 5000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 14,
+                SubCategory = SubCategory.Diligence
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Play game MetaFi: Eternal Kingdom",
+                Description = "Play game MetaFi: Eternal Kingdom and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Play 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Play game MetaFi: Infinity War",
+                Description = "Play game MetaFi: Infinity War and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Play 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Play game MetaFi: Angle Land",
+                Description = "Play game MetaFi: Angle Land and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Play 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Play game MetaFi: Space Alpha",
+                Description = "Play game MetaFi: Space Alpha and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow, 
+                SubCategory = SubCategory.Play
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Play game MetaFi: My Master War",
+                Description = "Play game MetaFi: My Master War and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Play 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Recharging Speed: 2 times",
+                Description = "Upgrade Recharging Speed: 2 times and earn rewards",
+                Reward = 2000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 2,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Recharging Speed: 4 times",
+                Description = "Upgrade Recharging Speed: 4 times and earn rewards",
+                Reward = 3000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 4,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Recharging Speed: 6 times",
+                Description = "Upgrade Recharging Speed: 6 times and earn rewards",
+                Reward = 4000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 6,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Buy AI Bot: x1",
+                Description = "Buy AI Bot: x1 and earn rewards",
+                Reward = 5000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 1,
+                SubCategory = SubCategory.Purchase 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Multitap: 3 times",
+                Description = "Upgrade Multitap: 3 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 3,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Multitap: 5 times",
+                Description = "Upgrade Multitap: 5 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 5,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Multitap: 7 times",
+                Description = "Upgrade Multitap: 7 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 7,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Energy limit: 3 times",
+                Description = "Upgrade Energy limit: 3 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 3,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Energy limit: 5 times",
+                Description = "Upgrade Energy limit: 5 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 5,
+                SubCategory = SubCategory.Upgrade 
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Upgrade Energy limit: 7 times",
+                Description = "Upgrade Energy limit: 7 times and earn rewards",
+                Reward = 1000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                Value = 7,
+                SubCategory = SubCategory.Upgrade  
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Vote 5 stars Store: Eternal Kingdom",
+                Description = "Vote 5 stars Store: Eternal Kingdom and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Vote  
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Vote 5 stars Store: Infinity War",
+                Description = "Vote 5 stars Store: Infinity War and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Vote  
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Vote 5 stars Store: Angle Land",
+                Description = "Vote 5 stars Store: Angle Land and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Vote  
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Vote 5 stars Store: Space Alpha",
+                Description = "Vote 5 stars Store: Space Alpha and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Vote  
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Farming,
+                Title = "Vote 5 stars Store: My Master War",
+                Description = "Vote 5 stars Store: My Master War and earn rewards",
+                Reward = 1500m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow, 
+                UpdatedAt = DateTime.UtcNow,
+                SubCategory = SubCategory.Vote  
+            },
+        });
+
         var existingTasks = _taskCollection.Find(x => true).Any();
         if (!existingTasks)
         {

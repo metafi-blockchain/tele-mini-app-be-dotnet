@@ -45,9 +45,18 @@ public enum TaskCategory
 
 public enum SubCategory
 {
+    // social
     X,
     Y,
     T,
     D,
-    F
+    F,
+
+    // farming
+    Farm,
+    Diligence,
+    Play,
+    Upgrade,
+    Vote,
+    Purchase
 }

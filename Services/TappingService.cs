@@ -51,6 +51,7 @@ public class TappingService : ITappingService
             {
                 Id = $"{BoostType.MultiTap}-{i}",
                 Name = $"Level {i}",
+                Description = "'Based on the level you have achieved, you will regenerate a certain amount of energy every second. The higher your level, the faster your energy will regenerate.",
                 Price = multiTapRequiredValues[i-1] * 1000,
                 Value = i,
                 Type = BoostType.MultiTap,
@@ -63,6 +64,7 @@ public class TappingService : ITappingService
             {
                 Id = $"{BoostType.EnergyLimit}-{i}",
                 Name = $"Level {i}",
+                Description = "Based on the level you have achieved, you will have a certain maximum energy capacity. The higher your level, the greater your maximum energy will be.",
                 Price = energyLimitRequiredValues[i-1] * 1000,
                 Value = i * 500,
                 Type = BoostType.EnergyLimit,
@@ -76,6 +78,7 @@ public class TappingService : ITappingService
             {
                 Id = $"{BoostType.RechargeSpeed}-{i}",
                 Name = $"Level {i}",
+                Description = "Based on the level you have achieved, you will regenerate a certain amount of energy every second. The higher your level, the more energy you will regain.",
                 Price = rechargeSpeedRequiredValues[i-1] * 1000,
                 Value = i,
                 Type = BoostType.RechargeSpeed,
@@ -88,7 +91,7 @@ public class TappingService : ITappingService
             {
                 Id = $"{BoostType.TapBot}-1",
                 Name = "Level 1",
-                Description = "Tap bot will tap for you. Get +4 points for every second until you reach 172800 points",
+                Description = "Tap bot will tap for you. Get points for every second until you reach 7,200 points",
                 Price = 200000,
                 Value = 4,
                 Type = BoostType.TapBot,
@@ -101,7 +104,7 @@ public class TappingService : ITappingService
             {
                 Id = $"{BoostType.PremiumBot}-1",
                 Name = "Level 1",
-                Description = "Tap bot will tap for you. Get 1M points for every day.",
+                Description = "Tap bot will tap for you. Get 28,800 points for every day.",
                 Price = 1,
                 Value = 1000000000m,
                 Type = BoostType.PremiumBot,
