@@ -70,6 +70,10 @@ public class User
     public DateTime? PremiumBotAt { get; set; }
     [BsonElement("ton_balance")]
     public long TonBalance { get; set; } = 0;
+    
+    [BsonElement("total_ton_balance_received")]
+    public long TotalTonBalanceReceived { get; set; } = 0;
+
     [BsonElement("is_receive_airdrop")]
     public bool IsReceiveAirdrop { get; set; }
     [BsonElement("amount_token")]
@@ -82,6 +86,12 @@ public class User
 
     [BsonElement("total_tournament_reward")]
     public long TotalTournamentReward { get; set; }
+    
+    [BsonElement("last_login")]
+    public DateTime? LastLogin { get; set; }
+    [BsonElement("number_of_consecutive_logins")]
+    public int NumberConsecutiveLogins { get; set; } = 0;
+    
 
     public UserViewModel ToUserViewModel() => new UserViewModel
     {

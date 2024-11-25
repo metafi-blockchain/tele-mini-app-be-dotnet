@@ -14,6 +14,7 @@ public interface ITaskService
     Task<ResponseDto<bool>> UpdateTaskItem(TaskItem taskItem);
     Task<ResponseDto<bool>> DeleteTaskItem(string id);
     Task<ResponseDto<string>> CompleteTask(string userId, string? taskId, string? code);
+    Task CheckUserDiligenceLoginAsync(string userId, int numberConsecutiveLogins);
 }
 public class TaskService : ITaskService
 {
@@ -51,7 +52,7 @@ public class TaskService : ITaskService
                 IsClaimed = myTask != null,
                 IsCompleted = task.Category switch
                 {
-                    TaskCategory.Farming => user.GrandBalance >= task.Value,
+                    TaskCategory.Farming => task.SubCategory == SubCategory.Farm ? user.GrandBalance >= task.Value : myTask != null,
                     TaskCategory.Referral => user.RefererCount >= task.Value,
                     _ => myTask != null
                 },
@@ -1265,7 +1266,7 @@ public class TaskService : ITaskService
         {
             // check if user has shared the post
         }
-        else if (task.Category == TaskCategory.Farming)
+        else if (task.Category == TaskCategory.Farming && task.SubCategory == SubCategory.Farm)
         {
             if (user.TapBalance < task.Value)
             {
@@ -1330,5 +1331,26 @@ public class TaskService : ITaskService
             Message = "Task completed.",
             Data = string.Empty
         };
+    }
+
+    public async Task CheckUserDiligenceLoginAsync(string userId, int numberConsecutiveLogins)
+    {
+        var levels = new List<int> { 3, 5, 7, 14 };
+
+        var level = levels.FirstOrDefault(item => item == numberConsecutiveLogins);
+
+        if(level == 0) 
+        {
+            return;
+        }
+
+        var taskItem = await _taskCollection.Find(c => c.SubCategory == SubCategory.Diligence && c.Value == numberConsecutiveLogins).FirstOrDefaultAsync();
+
+        if (taskItem is null)
+        {
+            return;
+        }
+
+        await CompleteTask(userId, taskItem.Id, string.Empty);
     }
 }

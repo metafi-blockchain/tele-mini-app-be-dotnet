@@ -28,7 +28,7 @@ public static class Constants
         public const double TonRewardForReferralLevel2 = 0.05;
         public const double TournamentReward = 1_000_000;
         public const int LimitTournament = 10;
-
+        public const long TonBalanceMax = 10_000_000_000;
     }
 
     public static class RedisKeyConstants

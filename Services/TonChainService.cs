@@ -304,8 +304,24 @@ public class TonChainService : ITonChainService
 
         if (referrer != null)
         {
-            const long ref1Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel1 * Constants.GameSettings.TonInNano);
+            long ref1Amount = (long)(Constants.GameSettings.TonRewardForReferralLevel1 * Constants.GameSettings.TonInNano);
 
+            if (referrer.TotalTonBalanceReceived == 0)
+            {
+                referrer.TotalTonBalanceReceived = referrer.TonBalance;
+            }
+
+            if (referrer.TotalTonBalanceReceived >= Constants.GameSettings.TonBalanceMax)
+            {
+                return;
+            }
+
+            if (referrer.TotalTonBalanceReceived + ref1Amount > Constants.GameSettings.TonBalanceMax)
+            {
+                ref1Amount = Constants.GameSettings.TonBalanceMax - referrer.TotalTonBalanceReceived;
+            }
+
+            referrer.TotalTonBalanceReceived += ref1Amount;
             referrer.TonBalance += ref1Amount;
 
             referrer.UpdatedAt = DateTime.UtcNow;

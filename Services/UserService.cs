@@ -181,6 +181,7 @@ public class UserService : IUserService
                     RefererCount = 0,
                     Balance = 0m,
                     BalanceUpdatedAt = DateTime.UtcNow,
+                    LastLogin = DateTime.UtcNow
                 };
                 bool isReferral = false;
                 if (!string.IsNullOrEmpty(loginViewModel.RefId) && loginViewModel.RefId != user.TelegramId)
@@ -200,6 +201,22 @@ public class UserService : IUserService
                         await UpdateAsync(refererUser.Id ?? string.Empty, refererUser);
                     }
                 }
+            }
+            else
+            {
+                if (user.LastLogin.HasValue && (DateTime.UtcNow.Date - user.LastLogin.Value.Date).Days == 1)
+                {
+                    user.NumberConsecutiveLogins++;
+                }
+                else
+                {
+                    user.NumberConsecutiveLogins = 0;
+                }
+
+                user.LastLogin = DateTime.UtcNow;
+
+                _ = UpdateAsync(user.Id, user);
+                _ = _taskService.CheckUserDiligenceLoginAsync(user.Id, user.NumberConsecutiveLogins);
             }
             
             var token = GenerateToken(user);
@@ -224,6 +241,7 @@ public class UserService : IUserService
             Success = false
         };
     }
+
     private string GenerateToken(User user)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
