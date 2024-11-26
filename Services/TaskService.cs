@@ -2,6 +2,7 @@ using System.Globalization;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OkCoin.API.Models;
+using OkCoin.API.Utils;
 using OkCoin.API.ViewModels;
 
 namespace OkCoin.API.Services;
@@ -15,6 +16,7 @@ public interface ITaskService
     Task<ResponseDto<bool>> DeleteTaskItem(string id);
     Task<ResponseDto<string>> CompleteTask(string userId, string? taskId, string? code);
     Task CheckUserDiligenceLoginAsync(string userId, int numberConsecutiveLogins);
+    Task CheckNumberOfUpdateForApp(string userId, string namePackage, int numberOfUpdate);
 }
 public class TaskService : ITaskService
 {
@@ -882,8 +884,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Recharging Speed: 2 times",
-                Description = "Upgrade Recharging Speed: 2 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 2 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 2 times and earn rewards",
                 Reward = 2000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -894,8 +896,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Recharging Speed: 4 times",
-                Description = "Upgrade Recharging Speed: 4 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 4 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 4 times and earn rewards",
                 Reward = 3000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -906,8 +908,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Recharging Speed: 6 times",
-                Description = "Upgrade Recharging Speed: 6 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 6 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.RECHARGING_SPEED}: 6 times and earn rewards",
                 Reward = 4000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -930,8 +932,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Multitap: 3 times",
-                Description = "Upgrade Multitap: 3 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 3 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 3 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -942,8 +944,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Multitap: 5 times",
-                Description = "Upgrade Multitap: 5 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 5 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 5 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -954,8 +956,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Multitap: 7 times",
-                Description = "Upgrade Multitap: 7 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 7 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.MULTI_TAP}: 7 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -966,8 +968,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Energy limit: 3 times",
-                Description = "Upgrade Energy limit: 3 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 3 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 3 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -978,8 +980,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Energy limit: 5 times",
-                Description = "Upgrade Energy limit: 5 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 5 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 5 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -990,8 +992,8 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Farming,
-                Title = "Upgrade Energy limit: 7 times",
-                Description = "Upgrade Energy limit: 7 times and earn rewards",
+                Title = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 7 times",
+                Description = $"Upgrade {Constants.NamePackageUpgrade.ENERGY_LIMIT}: 7 times and earn rewards",
                 Reward = 1000m,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow, 
@@ -1335,16 +1337,24 @@ public class TaskService : ITaskService
 
     public async Task CheckUserDiligenceLoginAsync(string userId, int numberConsecutiveLogins)
     {
-        var levels = new List<int> { 3, 5, 7, 14 };
+        var taskItem = await _taskCollection.Find(c => c.Category == TaskCategory.Farming 
+                                        && c.SubCategory == SubCategory.Diligence 
+                                        && c.Value == numberConsecutiveLogins).FirstOrDefaultAsync();
 
-        var level = levels.FirstOrDefault(item => item == numberConsecutiveLogins);
-
-        if(level == 0) 
+        if (taskItem is null)
         {
             return;
         }
 
-        var taskItem = await _taskCollection.Find(c => c.SubCategory == SubCategory.Diligence && c.Value == numberConsecutiveLogins).FirstOrDefaultAsync();
+        await CompleteTask(userId, taskItem.Id, string.Empty);
+    }
+
+    public async Task CheckNumberOfUpdateForApp(string userId, string namePackage, int numberOfUpdate)
+    {
+        var taskItem = await _taskCollection.Find(c => c.Category == TaskCategory.Farming 
+                                        && c.SubCategory == SubCategory.Upgrade 
+                                        && c.Title.ToLower().Contains(namePackage.ToLower())
+                                        && c.Value == numberOfUpdate).FirstOrDefaultAsync();
 
         if (taskItem is null)
         {

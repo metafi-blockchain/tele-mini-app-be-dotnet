@@ -26,14 +26,16 @@ public class TappingService : ITappingService
     private readonly IMongoCollection<User> _userCollection;
     private readonly ICacheService _redisCacheService;
     private readonly IStatisticService _statisticService;
+    private readonly ITaskService _taskService;
     private const string MultiTapRequiredValue = "5|10|20|30|40|50|60|70|80|90|180|360|720|1440|2880|5760|11520|23040|46080|92160";    
     private const string EnergyLimitRequiredValue = "5|10|20|30|40|50|60|70|80|90|180|360|720|1440|2880|5760|11520|23040|46080|92160";
     private const string RechargeSpeedRequiredValue = "5|10|20|50|100";
 
-    public TappingService(IOptions<DbSettings> myDatabaseSettings, ICacheService redisCacheService, IStatisticService statisticService)
+    public TappingService(IOptions<DbSettings> myDatabaseSettings, ICacheService redisCacheService, IStatisticService statisticService, ITaskService taskService)
     {
         _redisCacheService = redisCacheService;
         _statisticService = statisticService;
+        _taskService = taskService;
         var client = new MongoClient(myDatabaseSettings.Value.ConnectionString);
         var database = client.GetDatabase(myDatabaseSettings.Value.DatabaseName);
         _userCollection = database.GetCollection<User>(nameof(User));
@@ -154,6 +156,7 @@ public class TappingService : ITappingService
             user.EnergyLimitLevel += 1;
             user.EnergyLimitValue = int.Parse(upgradeItem.Value.ToString(CultureInfo.CurrentCulture));
             
+
             await _userCollection.ReplaceOneAsync(x => x.Id == userId, user);
             
             
@@ -165,6 +168,8 @@ public class TappingService : ITappingService
                 TransactionType = InGameTransactionType.Upgrade.ToString(),
                 Description = "Upgrade energy limit to " + upgradeItem.Value
             });
+
+            //_ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.ENERGY_LIMIT, user.EnergyLimitLevel);
             
             return new ResponseDto<UserViewModel>()
             {
@@ -205,6 +210,9 @@ public class TappingService : ITappingService
                 TransactionType = InGameTransactionType.Upgrade.ToString(),
                 Description = "Upgrade multi tap to " + upgradeItem.Value
             });
+
+            //_ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.MULTI_TAP, user.MultiTapLevel);
+
             return new ResponseDto<UserViewModel>()
             {
                 Message = "Upgrade is successful",
@@ -245,6 +253,8 @@ public class TappingService : ITappingService
                 TransactionType = InGameTransactionType.Upgrade.ToString(),
                 Description = "Upgrade recharge speed to " + upgradeItem.Value
             });
+
+            //_ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.RECHARGING_SPEED, user.RechargeSpeedLevel);
             
             return new ResponseDto<UserViewModel>()
             {

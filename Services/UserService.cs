@@ -216,7 +216,7 @@ public class UserService : IUserService
                 user.LastLogin = DateTime.UtcNow;
 
                 _ = UpdateAsync(user.Id, user);
-                _ = _taskService.CheckUserDiligenceLoginAsync(user.Id, user.NumberConsecutiveLogins);
+                //_ = _taskService.CheckUserDiligenceLoginAsync(user.Id, user.NumberConsecutiveLogins);
             }
             
             var token = GenerateToken(user);

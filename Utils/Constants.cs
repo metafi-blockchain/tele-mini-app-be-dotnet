@@ -35,4 +35,11 @@ public static class Constants
     {
         public const  string TOURNAMENT_RANKING = "TournamentRanking";
     }
+
+    public static class NamePackageUpgrade 
+    {
+        public const string RECHARGING_SPEED = "Recharging Speed";
+        public const string MULTI_TAP = "Multitap";
+        public const string ENERGY_LIMIT = "Energy limit";
+    }
 }
