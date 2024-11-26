@@ -11,5 +11,6 @@ public class MyTask
     public string? Id { get; set; }
     public string TaskId { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
+    public bool IsClaim { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

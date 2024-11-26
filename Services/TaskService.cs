@@ -51,7 +51,7 @@ public class TaskService : ITaskService
                 Title = task.Title,
                 Description = task.Description,
                 Reward = task.Reward,
-                IsClaimed = myTask != null,
+                IsClaimed = myTask != null && myTask.IsClaim,
                 IsCompleted = task.Category switch
                 {
                     TaskCategory.Farming => task.SubCategory == SubCategory.Farm ? user.GrandBalance >= task.Value : myTask != null,
@@ -1241,12 +1241,13 @@ public class TaskService : ITaskService
             };
         }
         var myTask = _myTaskCollection.Find(x => x.UserId == userId && x.TaskId == taskId).FirstOrDefault();
-        if(myTask != null)
+        if(myTask != null && myTask.IsClaim)
         {
             return new ResponseDto<string>()
             {
                 Success = false,
-                Message = "Task already completed.",
+                // Message = "Task already completed.",
+                 Message = "Task already claimed.",
                 Data = string.Empty
             };
         }
@@ -1293,14 +1294,21 @@ public class TaskService : ITaskService
             }
         }
         
-        
-        myTask = new MyTask()
+        if (myTask != null)
         {
-            TaskId = taskId,
-            UserId = userId,
-            CreatedAt = DateTime.UtcNow
-        };
-        await _myTaskCollection.InsertOneAsync(myTask);
+            myTask.IsClaim = true;
+            await _myTaskCollection.ReplaceOneAsync(myTask.Id, myTask);
+        }
+        else
+        {
+            myTask = new MyTask()
+            {
+                TaskId = taskId,
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _myTaskCollection.InsertOneAsync(myTask);
+        }
         
         user.Balance += task.Reward;
         
