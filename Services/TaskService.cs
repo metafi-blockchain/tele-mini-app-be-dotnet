@@ -1246,8 +1246,7 @@ public class TaskService : ITaskService
             return new ResponseDto<string>()
             {
                 Success = false,
-                // Message = "Task already completed.",
-                 Message = "Task already claimed.",
+                Message = "Task already claimed.",
                 Data = string.Empty
             };
         }
@@ -1354,7 +1353,15 @@ public class TaskService : ITaskService
             return;
         }
 
-        await CompleteTask(userId, taskItem.Id, string.Empty);
+        var myTask = new MyTask()
+        {
+            TaskId = taskItem.Id,
+            UserId = userId,
+            IsClaim = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        await _myTaskCollection.InsertOneAsync(myTask);
     }
 
     public async Task CheckNumberOfUpdateForApp(string userId, string namePackage, int numberOfUpdate)
@@ -1369,6 +1376,14 @@ public class TaskService : ITaskService
             return;
         }
 
-        await CompleteTask(userId, taskItem.Id, string.Empty);
+        var myTask = new MyTask()
+        {
+            TaskId = taskItem.Id,
+            UserId = userId,
+            IsClaim = false,
+            CreatedAt = DateTime.UtcNow
+        };
+        
+        await _myTaskCollection.InsertOneAsync(myTask);
     }
 }
