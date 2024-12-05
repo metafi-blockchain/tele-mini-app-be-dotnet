@@ -67,7 +67,8 @@ public class DashboardService : IDashboardService
                 TelegramId = c.TelegramId,
                 FirstName = c.FirstName,
                 LastName = c.LastName,
-                TournamentBalance = c.TournamentBalance
+                TournamentBalance = c.TournamentBalance,
+                LastUpdate = DateTime.UtcNow
             });
 
             await _redisCacheService.Set(RedisKeyConstants.TOURNAMENT_RANKING, JsonConvert.SerializeObject(tournamentRankingModel));

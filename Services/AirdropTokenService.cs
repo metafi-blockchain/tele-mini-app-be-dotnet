@@ -80,7 +80,11 @@ namespace OkCoin.API.Services
             }
 
             user.IsReceiveAirdrop = true;
-            user.Balance += GetInitialAirdropToken(user.TelegramId).Airdrop;
+            
+            var airdrop = GetInitialAirdropToken(user.TelegramId).Airdrop;
+            user.Balance += airdrop;
+            user.GrandBalance += airdrop;
+            user.TournamentBalance += airdrop;
 
             _ = _userService.UpdateAsync(userId, user);
 

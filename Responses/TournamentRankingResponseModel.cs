@@ -7,4 +7,5 @@ public class TournamentRankingResponseModel
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public decimal TournamentBalance { get; set; }
+    public DateTime LastUpdate { get; set; }
 }

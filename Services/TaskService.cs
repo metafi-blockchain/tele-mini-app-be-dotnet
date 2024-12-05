@@ -66,12 +66,7 @@ public class TaskService : ITaskService
                 Category = task.Category,
                 SubCategory = task.SubCategory.ToString(),
                 TaskValue = task.Value,
-                UserValue = task.Category switch
-                {
-                    TaskCategory.Farming => (long) user.GrandBalance,
-                    TaskCategory.Referral => user.RefererCount,
-                    _ => 0
-                },
+                UserValue = GetUserValue(task, user),
                 Order = task.Order
             });
         }
@@ -81,6 +76,46 @@ public class TaskService : ITaskService
             Message = string.Empty,
             Data = result.OrderByDescending(x => x.Order).ToList()
         };
+    }
+
+    private long GetUserValue(TaskItem task, User user)
+    {
+        long result = 0;
+
+        switch (task.Category)
+        {
+            case TaskCategory.Farming:
+                if (task.SubCategory == SubCategory.Farm)
+                {
+                    result = (long)user.GrandBalance;
+                }
+                else if (task.SubCategory == SubCategory.Diligence)
+                {
+                    result = user.NumberConsecutiveLogins;
+                }
+                else if (task.SubCategory == SubCategory.Upgrade) 
+                {
+                    if (task.Title.Contains(Constants.NamePackageUpgrade.ENERGY_LIMIT, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result = user.EnergyLimitLevel;
+                    }
+                    else if (task.Title.Contains(Constants.NamePackageUpgrade.RECHARGING_SPEED, StringComparison.OrdinalIgnoreCase)) 
+                    {
+                        result = user.RechargeSpeedLevel;
+                    }
+                    else if (task.Title.Contains(Constants.NamePackageUpgrade.MULTI_TAP, StringComparison.OrdinalIgnoreCase)) 
+                    {
+                        result = user.MultiTapLevel;
+                    }
+                }
+                break;
+
+            case TaskCategory.Referral:
+                result = user.RefererCount;
+                break;
+        }
+
+        return result;
     }
 
     public void CreateTasks()
@@ -1270,7 +1305,7 @@ public class TaskService : ITaskService
         }
         else if (task.Category == TaskCategory.Farming && task.SubCategory == SubCategory.Farm)
         {
-            if (user.TapBalance < task.Value)
+            if (user.GrandBalance < task.Value)
             {
                 return new ResponseDto<string>()
                 {
