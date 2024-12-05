@@ -32,7 +32,6 @@ public class UserViewModel
     
     public long TonBalance { get; set; } = 0;
     public bool IsReceiveAirdrop { get; set; }
-    public long AmountToken { get; set; } = 0;
     public string ReceiveAddress { get; set; } = string.Empty;
     public bool IsReceiveTournamentReward { get; set; }
     public long TotalTournamentReward { get; set; }

@@ -76,8 +76,6 @@ public class User
 
     [BsonElement("is_receive_airdrop")]
     public bool IsReceiveAirdrop { get; set; }
-    [BsonElement("amount_token")]
-    public long AmountToken { get; set; } = 0;
     [BsonElement("receive_address")]
     public string ReceiveAddress { get; set; } = string.Empty;
     
@@ -115,7 +113,6 @@ public class User
         HavePremiumBot = HavePremiumBot,
         TonBalance = TonBalance,
         IsReceiveAirdrop = IsReceiveAirdrop,
-        AmountToken = AmountToken,
         ReceiveAddress = ReceiveAddress,
         IsAdmin = IsAdmin,
         IsReceiveTournamentReward = IsReceiveTournamentReward,
