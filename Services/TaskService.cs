@@ -97,15 +97,16 @@ public class TaskService : ITaskService
                 {
                     if (task.Title.Contains(Constants.NamePackageUpgrade.ENERGY_LIMIT, StringComparison.OrdinalIgnoreCase))
                     {
-                        result = user.EnergyLimitLevel;
+                        // level default = 1
+                        result = user.EnergyLimitLevel - 1;
                     }
                     else if (task.Title.Contains(Constants.NamePackageUpgrade.RECHARGING_SPEED, StringComparison.OrdinalIgnoreCase)) 
                     {
-                        result = user.RechargeSpeedLevel;
+                        result = user.RechargeSpeedLevel - 1;
                     }
                     else if (task.Title.Contains(Constants.NamePackageUpgrade.MULTI_TAP, StringComparison.OrdinalIgnoreCase)) 
                     {
-                        result = user.MultiTapLevel;
+                        result = user.MultiTapLevel - 1;
                     }
                 }
                 break;
@@ -1331,7 +1332,7 @@ public class TaskService : ITaskService
         if (myTask != null)
         {
             myTask.IsClaim = true;
-            await _myTaskCollection.ReplaceOneAsync(myTask.Id, myTask);
+            await _myTaskCollection.ReplaceOneAsync(c => c.Id == myTask.Id, myTask);
         }
         else
         {

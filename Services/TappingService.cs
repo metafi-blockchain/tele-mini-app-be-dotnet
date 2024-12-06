@@ -169,7 +169,8 @@ public class TappingService : ITappingService
                 Description = "Upgrade energy limit to " + upgradeItem.Value
             });
 
-            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.ENERGY_LIMIT, user.EnergyLimitLevel);
+            // EnergyLimitLevel default = 1
+            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.ENERGY_LIMIT, user.EnergyLimitLevel - 1);
             
             return new ResponseDto<UserViewModel>()
             {
@@ -211,7 +212,8 @@ public class TappingService : ITappingService
                 Description = "Upgrade multi tap to " + upgradeItem.Value
             });
 
-            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.MULTI_TAP, user.MultiTapLevel);
+            // MultiTapLevel default = 1
+            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.MULTI_TAP, user.MultiTapLevel - 1);
 
             return new ResponseDto<UserViewModel>()
             {
@@ -254,7 +256,8 @@ public class TappingService : ITappingService
                 Description = "Upgrade recharge speed to " + upgradeItem.Value
             });
 
-            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.RECHARGING_SPEED, user.RechargeSpeedLevel);
+            // RechargeSpeedLevel default = 1
+            _ = _taskService.CheckNumberOfUpdateForApp(userId, Constants.NamePackageUpgrade.RECHARGING_SPEED, user.RechargeSpeedLevel - 1);
             
             return new ResponseDto<UserViewModel>()
             {
