@@ -174,6 +174,20 @@ public class TaskService : ITaskService
             new TaskItem()
             {
                 Category = TaskCategory.Social,
+                Title = "Join UXUY Wallet",
+                Description = "Check your wallet",
+                Reward = 10000m,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Url = "https://t.me/UXUYbot/app?startapp=A_1247878012_inviteEarn",
+                ImageUrl = "https://app.sportshero.club/images/game/uxuy.webp",
+                SubCategory = SubCategory.T,
+                Order = 999
+            },
+            new TaskItem()
+            {
+                Category = TaskCategory.Social,
                 Title = "Vertus",
                 Description = "Play a game",
                 Reward = 10000m,
